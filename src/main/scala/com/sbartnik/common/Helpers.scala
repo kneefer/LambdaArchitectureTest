@@ -1,10 +1,13 @@
 package com.sbartnik.common
 
-import net.liftweb.json.{JValue, Serialization, parse}
+import net.liftweb.json.{DefaultFormats, JValue, Serialization, parse}
 
 import scala.io.Source
+import scala.language.implicitConversions
 
 object Helpers {
+
+  private implicit val formats = DefaultFormats
 
   def getLinesFromResourceFile(resFileName: String): Array[String] =
     Source.fromInputStream(getClass.getResourceAsStream(s"/$resFileName")).getLines.toArray
@@ -12,6 +15,6 @@ object Helpers {
   def serialize[T <: AnyRef](value: T): String =
     Serialization.write(value)
 
-  protected def deserialize(value: String): JValue =
+  def deserialize(value: String): JValue =
     parse(value)
 }
