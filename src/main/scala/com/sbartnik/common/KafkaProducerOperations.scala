@@ -11,10 +11,11 @@ class KafkaProducerOperations(configProps: Properties, topic: String, numOfParti
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  val kafkaProducer = new KafkaProducer[String, String](configProps)
+  private val kafkaProducer = new KafkaProducer[String, String](configProps)
   logger.info(s"Initialized KafkaProducerOperations with topic '$topic' and properties: ${configProps.toString}")
+  logger.info(s"Topic $topic has ${kafkaProducer.partitionsFor(topic)} partitions")
 
-  val rnd = new Random()
+  private val rnd = new Random()
 
   def send(message: String): Boolean = {
     try {

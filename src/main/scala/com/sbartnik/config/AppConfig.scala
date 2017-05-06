@@ -60,5 +60,6 @@ object AppConfig {
     val numOfVisitors: Int = trafficGenConfig.getInt("numOfVisitors")
     val timeMultiplier: Int = trafficGenConfig.getInt("timeMultiplier")
     val numOfSubpages: Int = trafficGenConfig.getInt("numOfSubpages")
+    val sleepAfterEachFileMs: Int = trafficGenConfig.getInt("sleepAfterEachFileMs")
   }
 }
