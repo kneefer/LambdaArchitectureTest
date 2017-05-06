@@ -2,7 +2,7 @@ import Dependencies._
 
 name := "LambdaArchitectureTest"
 
-spName := "kneefer/LambdaArchitectureTest"
+spName := "sbartnik/LambdaArchitectureTest"
 
 scalacOptions += "-feature"
 
@@ -17,7 +17,7 @@ licenses += "Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
 spIncludeMaven := true
 
 lazy val commonSettings = Seq(
-  organization := "com.kneefer",
+  organization := "com.sbartnik",
   scalaVersion := "2.11.8",
   version := "0.1.0"
 )
