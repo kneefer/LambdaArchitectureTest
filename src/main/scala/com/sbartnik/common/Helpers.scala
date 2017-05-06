@@ -1,6 +1,6 @@
 package com.sbartnik.common
 
-import net.liftweb.json.Serialization
+import net.liftweb.json.{JValue, Serialization, parse}
 
 import scala.io.Source
 
@@ -11,4 +11,7 @@ object Helpers {
 
   def serialize[T <: AnyRef](value: T): String =
     Serialization.write(value)
+
+  protected def deserialize(value: String): JValue =
+    parse(value)
 }

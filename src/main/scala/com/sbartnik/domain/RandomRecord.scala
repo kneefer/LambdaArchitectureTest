@@ -9,9 +9,4 @@ case class RandomRecord(timestamp: Long,
                         timeSpentSeconds: Int,
                         subPage: String,
                         site: String) {
-
-  def convertToLine: String = {
-    val line = s"$timestamp\t$referrer\t$action\t$previousPage\t$visitor\t$geo\t$timeSpentSeconds\t$subPage\t$site\n"
-    line
-  }
 }

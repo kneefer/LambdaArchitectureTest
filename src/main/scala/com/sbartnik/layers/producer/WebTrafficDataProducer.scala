@@ -44,7 +44,7 @@ object WebTrafficDataProducer extends App {
       timestamp = System.currentTimeMillis
 
       val record = getRandomRecord(adjustedTimestamp, currRecordIndex)
-      val recordAsLine = record.convertToLine
+      val recordAsLine = serialize(record)
       kafkaOps.send(recordAsLine)
 
       if(currRecordIndex % randomSleepEvery == 0) {
