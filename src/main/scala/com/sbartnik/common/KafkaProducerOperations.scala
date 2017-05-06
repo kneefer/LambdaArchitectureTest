@@ -4,7 +4,8 @@ import java.util.Properties
 
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.slf4j.LoggerFactory
-
+import com.sbartnik.common.Helpers._
+import scala.language.reflectiveCalls
 import scala.util.Random
 
 class KafkaProducerOperations(configProps: Properties, topic: String, numOfPartitions: Int) {
@@ -12,7 +13,7 @@ class KafkaProducerOperations(configProps: Properties, topic: String, numOfParti
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   private val kafkaProducer = new KafkaProducer[String, String](configProps)
-  logger.info(s"Initialized KafkaProducerOperations with topic '$topic' and properties: ${configProps.toString}")
+  logger.info(s"Initialized KafkaProducerOperations with topic '$topic' and properties: ${configProps.format}")
   logger.info(s"Topic $topic has ${kafkaProducer.partitionsFor(topic)} partitions")
 
   private val rnd = new Random()

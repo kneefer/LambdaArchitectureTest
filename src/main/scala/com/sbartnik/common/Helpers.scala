@@ -1,5 +1,8 @@
 package com.sbartnik.common
 
+import java.util.{Collections, Properties}
+import java.util.stream.Collectors
+
 import net.liftweb.json.{DefaultFormats, JValue, Serialization, parse}
 
 import scala.io.Source
@@ -17,4 +20,10 @@ object Helpers {
 
   def deserialize(value: String): JValue =
     parse(value)
+
+  implicit def propertiesExtensions(properties: Properties) = new {
+    def format: String = {
+      properties.toString
+    }
+  }
 }
