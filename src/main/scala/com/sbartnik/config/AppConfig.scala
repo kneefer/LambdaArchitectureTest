@@ -36,20 +36,33 @@ object AppConfig {
       val valueSerializerClass: String = kafkaProducerConfig.getString("valueSerializerClass")
     }
 
-    object Consumer {
-      private val kafkaConsumerConfig = appConfig.getConfig("consumer")
+    object HdfsConsumer {
+      private val fileSystemConsumerConfig = appConfig.getConfig("hdfsConsumer")
 
-      val groupId: String = kafkaConsumerConfig.getString("groupId")
-      val clientId: String = kafkaConsumerConfig.getString("clientId")
-      val zookeeperConnect: String = kafkaConsumerConfig.getString("zookeeperConnect")
-      val enableAutoCommit: String = kafkaConsumerConfig.getString("enableAutoCommit")
-      val autoOffsetReset: String = kafkaConsumerConfig.getString("autoOffsetReset")
-      val consumerTimeoutMs: Int = kafkaConsumerConfig.getInt("consumerTimeoutMs")
-      val autoCommitIntervalMs: Int = kafkaConsumerConfig.getInt("autoCommitIntervalMs")
-      val keyDeserializerClass: String = kafkaConsumerConfig.getString("keyDeserializerClass")
-      val valueDeserializerClass: String = kafkaConsumerConfig.getString("valueDeserializerClass")
+      val groupId: String = fileSystemConsumerConfig.getString("groupId")
+      val clientId: String = fileSystemConsumerConfig.getString("clientId")
+      val zookeeperConnect: String = fileSystemConsumerConfig.getString("zookeeperConnect")
+      val enableAutoCommit: String = fileSystemConsumerConfig.getString("enableAutoCommit")
+      val autoOffsetReset: String = fileSystemConsumerConfig.getString("autoOffsetReset")
+      val consumerTimeoutMs: Int = fileSystemConsumerConfig.getInt("consumerTimeoutMs")
+      val autoCommitIntervalMs: Int = fileSystemConsumerConfig.getInt("autoCommitIntervalMs")
+      val keyDeserializerClass: String = fileSystemConsumerConfig.getString("keyDeserializerClass")
+      val valueDeserializerClass: String = fileSystemConsumerConfig.getString("valueDeserializerClass")
     }
 
+    object BatchConsumer {
+      private val fileSystemConsumerConfig = appConfig.getConfig("batchConsumer")
+
+      val groupId: String = fileSystemConsumerConfig.getString("groupId")
+      val clientId: String = fileSystemConsumerConfig.getString("clientId")
+      val zookeeperConnect: String = fileSystemConsumerConfig.getString("zookeeperConnect")
+      val enableAutoCommit: String = fileSystemConsumerConfig.getString("enableAutoCommit")
+      val autoOffsetReset: String = fileSystemConsumerConfig.getString("autoOffsetReset")
+      val consumerTimeoutMs: Int = fileSystemConsumerConfig.getInt("consumerTimeoutMs")
+      val autoCommitIntervalMs: Int = fileSystemConsumerConfig.getInt("autoCommitIntervalMs")
+      val keyDeserializerClass: String = fileSystemConsumerConfig.getString("keyDeserializerClass")
+      val valueDeserializerClass: String = fileSystemConsumerConfig.getString("valueDeserializerClass")
+    }
   }
 
   object TrafficGen {

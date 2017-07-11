@@ -21,18 +21,33 @@ object ConfigurationProvider {
     props
   }
 
-  def kafkaConsumer: Properties = {
-    val kafkaConsumerConf = AppConfig.Kafka.Consumer
+  def hdfsKafkaConsumer: Properties = {
+    val hdfsKafkaConsumer = AppConfig.Kafka.HdfsConsumer
     val props = new Properties()
-    props.put(ConsumerConfig.CLIENT_ID_CONFIG, kafkaConsumerConf.clientId)
-    props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConsumerConf.groupId)
-    props.put("zookeeper.connect",kafkaConsumerConf.zookeeperConnect)
-    props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, kafkaConsumerConf.enableAutoCommit)
-    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaConsumerConf.autoOffsetReset)
-    props.put("consumer.timeout.ms", kafkaConsumerConf.consumerTimeoutMs.toString)
-    props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, kafkaConsumerConf.autoCommitIntervalMs.toString)
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, kafkaConsumerConf.keyDeserializerClass)
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, kafkaConsumerConf.valueDeserializerClass)
+    props.put(ConsumerConfig.CLIENT_ID_CONFIG, hdfsKafkaConsumer.clientId)
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, hdfsKafkaConsumer.groupId)
+    props.put("zookeeper.connect",hdfsKafkaConsumer.zookeeperConnect)
+    props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, hdfsKafkaConsumer.enableAutoCommit)
+    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, hdfsKafkaConsumer.autoOffsetReset)
+    props.put("consumer.timeout.ms", hdfsKafkaConsumer.consumerTimeoutMs.toString)
+    props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, hdfsKafkaConsumer.autoCommitIntervalMs.toString)
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, hdfsKafkaConsumer.keyDeserializerClass)
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, hdfsKafkaConsumer.valueDeserializerClass)
+    props
+  }
+
+  def batchKafkaConsumer: Properties = {
+    val batchKafkaConsumerConf = AppConfig.Kafka.BatchConsumer
+    val props = new Properties()
+    props.put(ConsumerConfig.CLIENT_ID_CONFIG, batchKafkaConsumerConf.clientId)
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, batchKafkaConsumerConf.groupId)
+    props.put("zookeeper.connect",batchKafkaConsumerConf.zookeeperConnect)
+    props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, batchKafkaConsumerConf.enableAutoCommit)
+    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, batchKafkaConsumerConf.autoOffsetReset)
+    props.put("consumer.timeout.ms", batchKafkaConsumerConf.consumerTimeoutMs.toString)
+    props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, batchKafkaConsumerConf.autoCommitIntervalMs.toString)
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, batchKafkaConsumerConf.keyDeserializerClass)
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, batchKafkaConsumerConf.valueDeserializerClass)
     props
   }
 }
