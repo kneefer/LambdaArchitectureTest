@@ -18,8 +18,8 @@ object Helpers {
   def serialize[T <: AnyRef](value: T): String =
     Serialization.write(value)
 
-  def deserialize(value: String): JValue =
-    parse(value)
+  def deserialize[T <: AnyRef](value: String): T =
+    Serialization.read(value)
 
   implicit def propertiesExtensions(properties: Properties) = new {
     def format: String = {

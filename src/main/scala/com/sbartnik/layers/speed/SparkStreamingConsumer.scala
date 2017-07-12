@@ -49,9 +49,13 @@ object SparkStreamingConsumer extends App {
     randomRecordStream.foreachRDD(rdd => {
       val randomRecordDF = rdd
         .toDF()
-        .selectExpr("timestamp", "referrer", "action", "previousPage", "visitor", "geo",
-        "timeSpentSeconds", "subPage", "site", "props.kafkaPartition as kafkaPartition",
-        "props.fromOffset as fromOffset", "props.untilOffset as untilOffset")
+        .selectExpr(
+          "timestamp", "referrer", "action",
+          "previousPage", "visitor", "geo",
+          "timeSpentSeconds", "subPage", "site",
+          "props.kafkaPartition as kafkaPartition",
+          "props.fromOffset as fromOffset",
+          "props.untilOffset as untilOffset")
 
       randomRecordDF
         .write
