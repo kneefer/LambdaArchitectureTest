@@ -7,7 +7,7 @@ import com.sbartnik.domain.RandomRecord
 import org.slf4j.LoggerFactory
 import scala.util.Random
 
-object WebTrafficDataProducer extends App {
+object KafkaDataProducer extends App {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
