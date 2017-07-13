@@ -15,12 +15,6 @@ object Helpers {
   def getLinesFromResourceFile(resFileName: String): Array[String] =
     Source.fromInputStream(getClass.getResourceAsStream(s"/$resFileName")).getLines.toArray
 
-  def serialize[T <: AnyRef](value: T): String =
-    Serialization.write(value)
-
-  def deserialize[T <: AnyRef](value: String): T =
-    Serialization.read(value)
-
   implicit def propertiesExtensions(properties: Properties) = new {
     def format: String = {
       properties.toString

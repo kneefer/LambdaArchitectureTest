@@ -25,7 +25,7 @@ object SparkStreamingConsumer extends App {
     .builder()
     .appName("Spark Streaming HDFS Consumer")
     .master("local[*]")
-    .config("spark.sql.warehouse.dir", "file:${system:user.dir}/spark-warehouse")
+    .config("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
     .getOrCreate()
 
   var sc = sparkSession.sparkContext
@@ -52,6 +52,7 @@ object SparkStreamingConsumer extends App {
           "timestamp", "referrer", "action",
           "previousPage", "visitor", "geo",
           "timeSpentSeconds", "subPage", "site",
+          "props.topic as topic",
           "props.kafkaPartition as kafkaPartition",
           "props.fromOffset as fromOffset",
           "props.untilOffset as untilOffset")

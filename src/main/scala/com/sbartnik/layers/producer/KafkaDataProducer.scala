@@ -44,7 +44,7 @@ object KafkaDataProducer extends App {
       timestamp = System.currentTimeMillis
 
       val record = getRandomRecord(adjustedTimestamp, currRecordIndex)
-      val recordAsLine = serialize(record)
+      val recordAsLine = record.serialized
       kafkaOps.send(recordAsLine)
 
       if(currRecordIndex % randomSleepEvery == 0) {
