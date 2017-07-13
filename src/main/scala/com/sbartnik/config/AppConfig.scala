@@ -37,7 +37,7 @@ object AppConfig {
     }
 
     object HdfsConsumer {
-      private val fileSystemConsumerConfig = appConfig.getConfig("hdfsConsumer")
+      private val fileSystemConsumerConfig = kafkaConfig.getConfig("hdfsConsumer")
 
       val groupId: String = fileSystemConsumerConfig.getString("groupId")
       val clientId: String = fileSystemConsumerConfig.getString("clientId")
@@ -51,7 +51,7 @@ object AppConfig {
     }
 
     object BatchConsumer {
-      private val fileSystemConsumerConfig = appConfig.getConfig("batchConsumer")
+      private val fileSystemConsumerConfig = kafkaConfig.getConfig("batchConsumer")
 
       val groupId: String = fileSystemConsumerConfig.getString("groupId")
       val clientId: String = fileSystemConsumerConfig.getString("clientId")

@@ -9,9 +9,6 @@ import org.apache.spark.SparkConf
 import org.apache.spark.streaming.kafka.KafkaUtils
 
 object SparkStreamingConsumer extends App {
-  val sparkConf = new SparkConf()
-    .setAppName("Spark Streaming HDFS Consumer")
-    .setMaster("local[*]")
 
   val kafkaConf = AppConfig.Kafka
   val kafkaDirectParams = Map(
@@ -26,7 +23,9 @@ object SparkStreamingConsumer extends App {
 
   val sparkSession = SparkSession
     .builder()
-    .config(sparkConf)
+    .appName("Spark Streaming HDFS Consumer")
+    .master("local[*]")
+    .config("spark.sql.warehouse.dir", "file:${system:user.dir}/spark-warehouse")
     .getOrCreate()
 
   var sc = sparkSession.sparkContext

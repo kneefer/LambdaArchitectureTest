@@ -26,6 +26,7 @@ lazy val deps = Seq(
   kafka,
   akkaHttp,
   lift,
+  sparkHive,
   twitterStream,
   sparkStreamingKafka,
   sparkCassandraConnect,
