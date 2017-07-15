@@ -68,8 +68,8 @@ object AppConfig {
   object TrafficGen {
     private val trafficGenConfig = appConfig.getConfig("trafficGen")
 
-    val recordsPerFile: Int = trafficGenConfig.getInt("recordsPerFile")
-    val numOfFiles: Int = trafficGenConfig.getInt("numOfFiles")
+    val recordsPerBatch: Int = trafficGenConfig.getInt("recordsPerBatch")
+    val numOfBatches: Int = trafficGenConfig.getInt("numOfBatches")
     val numOfVisitors: Int = trafficGenConfig.getInt("numOfVisitors")
     val timeMultiplier: Int = trafficGenConfig.getInt("timeMultiplier")
     val numOfSubpages: Int = trafficGenConfig.getInt("numOfSubpages")

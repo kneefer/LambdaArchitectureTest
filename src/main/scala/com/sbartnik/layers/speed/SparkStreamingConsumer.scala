@@ -17,9 +17,9 @@ object SparkStreamingConsumer extends App {
     "auto.offset.reset" -> kafkaConf.HdfsConsumer.autoOffsetReset
   )
 
-  val checkpointDirectory = "hdfs://localhost:8020/spark/checkpoints"
+  val checkpointDirectory = "hdfs://localhost:9000/spark/checkpoints"
   val batchDuration = Seconds(5)
-  val hdfsPath = "hdfs://localhost:8020/spark/data"
+  val hdfsPath = "hdfs://localhost:9000/spark/data"
 
   val sparkSession = SparkSession
     .builder()

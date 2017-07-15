@@ -33,13 +33,13 @@ object KafkaDataProducer extends App {
     kafkaTopic,
     kafkaNumOfPartitions)
 
-  for (currFileNum <- 1 to generatorConfig.numOfFiles) {
+  for (currFileNum <- 1 to generatorConfig.numOfBatches) {
 
-    val randomSleepEvery = rnd.nextInt(generatorConfig.recordsPerFile - 1) + 1
+    val randomSleepEvery = rnd.nextInt(generatorConfig.recordsPerBatch - 1) + 1
     var timestamp = System.currentTimeMillis()
     var adjustedTimestamp = timestamp
 
-    for (currRecordIndex <- 1 to generatorConfig.recordsPerFile) {
+    for (currRecordIndex <- 1 to generatorConfig.recordsPerBatch) {
       adjustedTimestamp = adjustedTimestamp + ((System.currentTimeMillis - timestamp) * generatorConfig.timeMultiplier)
       timestamp = System.currentTimeMillis
 
@@ -49,7 +49,7 @@ object KafkaDataProducer extends App {
 
       if(currRecordIndex % randomSleepEvery == 0) {
         logger.info(s"Sent $currRecordIndex messages")
-        val sleepTime = rnd.nextInt(randomSleepEvery * 60)
+        val sleepTime = rnd.nextInt(randomSleepEvery)
         logger.info(s"Sleeping for $sleepTime ms")
         Thread.sleep(sleepTime)
       }
@@ -61,7 +61,7 @@ object KafkaDataProducer extends App {
   }
 
   def getRandomRecord(timestamp: Long, currRecordIndex: Int): RandomRecord = {
-    val action = currRecordIndex % (rnd.nextInt(generatorConfig.recordsPerFile) + 1) match {
+    val action = currRecordIndex % (rnd.nextInt(generatorConfig.recordsPerBatch) + 1) match {
       case 0 => "add_to_favorites"
       case 1 => "comment"
       case _ => "page_view"

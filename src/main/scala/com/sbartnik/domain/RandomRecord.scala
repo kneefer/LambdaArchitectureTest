@@ -42,7 +42,7 @@ object RandomRecord {
       iter.flatMap(kv => {
         val randomRecord = RandomRecord.deserialize(kv._2) match {
           case Some(x) => {
-            x.timestamp / BUCKET_MS_SIZE * BUCKET_MS_SIZE
+            x.timestamp = x.timestamp / BUCKET_MS_SIZE * BUCKET_MS_SIZE
             x.props = Map(
               "topic" -> or.topic,
               "kafkaPartition" -> or.partition.toString,
