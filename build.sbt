@@ -34,7 +34,9 @@ lazy val deps = Seq(
   logback,
   akkaHttpJson,
   jansi,
-  json4s
+  json4s,
+  tranquilityCore,
+  tranquilitySpark
 )
 
 lazy val root = (project in file("."))

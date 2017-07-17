@@ -1,12 +1,62 @@
 package com.sbartnik.layers.speed
 
-import com.sbartnik.config.{AppConfig, ConfigurationProvider}
-import com.sbartnik.domain.RandomRecord
+import com.metamx.common.Granularity
+import com.metamx.tranquility.beam.{Beam, ClusteredBeamTuning}
+import com.metamx.tranquility.druid.{DruidBeams, DruidLocation, DruidRollup, SpecificDruidDimensions}
+import com.metamx.tranquility.spark.BeamFactory
+import com.sbartnik.config.AppConfig
+import com.sbartnik.domain.{ActionBySite, SiteActionRecord}
+import io.druid.granularity.QueryGranularities
+import io.druid.query.aggregation.LongSumAggregatorFactory
 import kafka.serializer.StringDecoder
-import org.apache.spark.sql.{SaveMode, SparkSession, TypedColumn}
-import org.apache.spark.streaming.{Seconds, StreamingContext}
-import org.apache.spark.SparkConf
+import org.apache.curator.framework.CuratorFrameworkFactory
+import org.apache.curator.retry.BoundedExponentialBackoffRetry
+import org.apache.spark.sql.{SaveMode, SparkSession}
+import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.KafkaUtils
+import org.joda.time.{DateTime, Period}
+
+class SiteActionRecordBeamFactory extends BeamFactory[SiteActionRecord]
+{
+  // Return a singleton, so the same connection is shared across all tasks in the same JVM.
+  def makeBeam: Beam[SiteActionRecord] = SiteActionRecordBeamFactory.BeamInstance
+}
+
+object SiteActionRecordBeamFactory
+{
+  val BeamInstance: Beam[SiteActionRecord] = {
+    // Tranquility uses ZooKeeper (through Curator framework) for coordination.
+    val curator = CuratorFrameworkFactory.newClient(
+      "localhost:3002",
+      new BoundedExponentialBackoffRetry(100, 3000, 5)
+    )
+    curator.start()
+
+    val indexService = "druid/overlord" // Your overlord's druid.service, with slashes replaced by colons.
+    val firehoseService = ""
+    val discoveryPath = "/druid/discovery"     // Your overlord's druid.discovery.curator.path
+    val dataSource = "foo"
+    val dimensions = IndexedSeq("bar")
+    val aggregators = Seq(new LongSumAggregatorFactory("baz", "baz"))
+
+    // Expects simpleEvent.timestamp to return a Joda DateTime object.
+    DruidBeams
+      .builder((simpleEvent: SiteActionRecord) => new DateTime(simpleEvent.timestamp))
+      .curator(curator)
+      .discoveryPath(discoveryPath)
+      .location(DruidLocation(indexService, firehoseService, dataSource))
+      .rollup(DruidRollup(SpecificDruidDimensions(dimensions), aggregators, QueryGranularities.MINUTE))
+      .tuning(
+        ClusteredBeamTuning(
+          segmentGranularity = Granularity.HOUR,
+          windowPeriod = new Period("PT10M"),
+          partitions = 1,
+          replicants = 1
+        )
+      )
+      .buildBeam()
+  }
+}
 
 object SparkStreamingConsumer extends App {
 
@@ -30,11 +80,11 @@ object SparkStreamingConsumer extends App {
     .config("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
     .getOrCreate()
 
+  import ss.implicits._
+
   var sc = ss.sparkContext
   sc.setCheckpointDir(checkpointDirectory)
-  val sqlContext = ss.sqlContext
-
-  import ss.implicits._
+  val sqlc = ss.sqlContext
 
   def sparkStreamingCreateFunction(): StreamingContext = {
     val ssc = new StreamingContext(sc, streamingBatchDuration)
@@ -43,12 +93,15 @@ object SparkStreamingConsumer extends App {
       ssc, kafkaDirectParams, Set(kafkaConf.topic)
     )
 
-    val randomRecordStream = kafkaDirectStream
-      .transform(RandomRecord.fromStringRDDToRDD)
+    val siteActionRecordStream = kafkaDirectStream
+      .transform(SiteActionRecord.fromStringRDDToRDD)
       .cache()
 
-    randomRecordStream.foreachRDD(rdd => {
-      val randomRecordDF = rdd
+    /////////////////////
+    // Save to HDFS
+    /////////////////////
+    siteActionRecordStream.foreachRDD(rdd => {
+      val siteActionRecordDF = rdd
         .toDF()
         .selectExpr(
           "timestamp", "timestampBucket", "referrer", "action",
@@ -59,12 +112,63 @@ object SparkStreamingConsumer extends App {
           "props.fromOffset as fromOffset",
           "props.untilOffset as untilOffset")
 
-      randomRecordDF
+      siteActionRecordDF
         .write
         .partitionBy("topic", "kafkaPartition", "timestampBucket")
         .mode(SaveMode.Append)
         .parquet(dataPath)
     })
+
+    //////////////////////////
+    // Compute action by site
+    //////////////////////////
+
+    val actionsBySiteStateSpec = StateSpec
+      .function((k: (String, Long), v: Option[ActionBySite], state: State[(Long, Long, Long)]) => {
+        var (favCount, commCount, viewCount) = state.getOption().getOrElse((0L, 0L, 0L))
+        val newVal = v match {
+          case Some(x) => (x.favCount, x.commCount, x.viewCount)
+          case _ => (0L, 0L, 0L)
+        }
+
+        favCount += newVal._1
+        commCount += newVal._2
+        viewCount += newVal._3
+
+        state.update((favCount, commCount, viewCount))
+      })
+      .timeout(Minutes(120))
+
+    val actionBySite = siteActionRecordStream.transform(rdd => {
+      rdd.toDF().createOrReplaceTempView("records")
+      val actionsBySite = sqlc.sql(
+        """SELECT site, timestampBucket,
+            |SUM(CASE WHEN action = 'add_to_favorites' THEN 1 ELSE 0 END) as favCount,
+            |SUM(CASE WHEN action = 'comment' THEN 1 ELSE 0 END) as commCount,
+            |SUM(CASE WHEN action = 'page_view' THEN 1 ELSE 0 END) as viewCount
+          |FROM records
+          |GROUP BY site, timestampBucket
+          |ORDER BY site
+        """.stripMargin
+      )
+
+      actionsBySite.map(x => (
+        (x.getString(0), x.getLong(1)),
+        ActionBySite(x.getString(0), x.getLong(1), x.getLong(2), x.getLong(3), x.getLong(4))
+      )).rdd
+    })
+
+    val reducedActionBySite = actionBySite
+      .mapWithState(actionsBySiteStateSpec)
+      .stateSnapshots()
+      .reduceByKeyAndWindow(
+        (a, b) => b,
+        (x, y) => x,
+        Seconds(conf.streamingWindowDurationSeconds / conf.streamingBatchDurationSeconds * conf.streamingBatchDurationSeconds)
+      )
+
+    val mappedActionBySite = reducedActionBySite.map(x => ActionBySite(x._1._1, x._1._2, x._2._1, x._2._2, x._2._3))
+    //mappedActionBySite.print(200)
 
     ssc
   }

@@ -28,10 +28,9 @@ object BatchHdfsJob extends App {
         |COUNT(DISTINCT visitor) as uniqueVisitors
       |FROM records
       |GROUP BY site, timestampBucket
-      |ORDER BY site
     """.stripMargin)
 
-  uniqueVisitorsBySite.show(500)
+  //uniqueVisitorsBySite.show(500)
 
   uniqueVisitorsBySite
     .write
@@ -46,11 +45,10 @@ object BatchHdfsJob extends App {
         |SUM(CASE WHEN action = 'page_view' THEN 1 ELSE 0 END) as viewCount
       |FROM records
       |GROUP BY site, timestampBucket
-      |ORDER BY site
     """.stripMargin
-  )
+  ).cache()
 
-  actionsBySite.show(500)
+  //actionsBySite.show(500)
 
   actionsBySite
     .write

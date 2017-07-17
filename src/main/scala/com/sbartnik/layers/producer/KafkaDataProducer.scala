@@ -3,7 +3,7 @@ package com.sbartnik.layers.producer
 import com.sbartnik.config.{AppConfig, ConfigurationProvider}
 import com.sbartnik.common.Helpers._
 import com.sbartnik.common.KafkaProducerOperations
-import com.sbartnik.domain.RandomRecord
+import com.sbartnik.domain.SiteActionRecord
 import org.slf4j.LoggerFactory
 import scala.util.Random
 
@@ -43,7 +43,7 @@ object KafkaDataProducer extends App {
       adjustedTimestamp = adjustedTimestamp + ((System.currentTimeMillis - timestamp) * generatorConfig.timeMultiplier)
       timestamp = System.currentTimeMillis
 
-      val record = getRandomRecord(timestamp, currRecordIndex)
+      val record = getRandomSiteActionRecord(timestamp, currRecordIndex)
       val recordAsLine = record.serialized
       kafkaOps.send(recordAsLine)
 
@@ -60,7 +60,7 @@ object KafkaDataProducer extends App {
     Thread.sleep(sleepAfterEachFile)
   }
 
-  def getRandomRecord(timestamp: Long, currRecordIndex: Int): RandomRecord = {
+  def getRandomSiteActionRecord(timestamp: Long, currRecordIndex: Int): SiteActionRecord = {
     val action = currRecordIndex % (rnd.nextInt(generatorConfig.recordsPerBatch) + 1) match {
       case 0 => "add_to_favorites"
       case 1 => "comment"
@@ -86,9 +86,9 @@ object KafkaDataProducer extends App {
     val subPage = subpagesIds(rnd.nextInt(subpagesIds.length - 1))
     val site = sites(rnd.nextInt(sites.length - 1))
 
-    val randomRecord = RandomRecord(
+    val siteActionRecord = SiteActionRecord(
       timestamp, -1, referrer, action, previousPage, visitor, geo, timeSpentSeconds, subPage, site
     )
-    randomRecord
+    siteActionRecord
   }
 }
