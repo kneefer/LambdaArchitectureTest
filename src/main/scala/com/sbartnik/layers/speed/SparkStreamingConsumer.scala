@@ -10,32 +10,34 @@ import org.apache.spark.streaming.kafka.KafkaUtils
 
 object SparkStreamingConsumer extends App {
 
-  val kafkaConf = AppConfig.Kafka
+  val conf = AppConfig
+  val kafkaConf = conf.Kafka
+
   val kafkaDirectParams = Map(
     "metadata.broker.list" -> kafkaConf.Producer.bootstrapServers,
     "group.id" -> kafkaConf.HdfsConsumer.groupId,
     "auto.offset.reset" -> kafkaConf.HdfsConsumer.autoOffsetReset
   )
 
-  val checkpointDirectory = "hdfs://localhost:9000/spark/checkpoints"
-  val batchDuration = Seconds(5)
-  val hdfsPath = "hdfs://localhost:9000/spark/data"
+  val checkpointDirectory = conf.checkpointDir
+  val streamingBatchDuration = Seconds(conf.streamingBatchDurationSeconds)
+  val dataPath = conf.hdfsDataPath
 
-  val sparkSession = SparkSession
+  val ss = SparkSession
     .builder()
-    .appName("Spark Streaming HDFS Consumer")
-    .master("local[*]")
+    .appName("Spark Streaming Processing")
+    .master(conf.sparkMaster)
     .config("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
     .getOrCreate()
 
-  var sc = sparkSession.sparkContext
+  var sc = ss.sparkContext
   sc.setCheckpointDir(checkpointDirectory)
-  val sqlContext = sparkSession.sqlContext
+  val sqlContext = ss.sqlContext
 
-  import sparkSession.implicits._
+  import ss.implicits._
 
   def sparkStreamingCreateFunction(): StreamingContext = {
-    val ssc = new StreamingContext(sc, batchDuration)
+    val ssc = new StreamingContext(sc, streamingBatchDuration)
 
     val kafkaDirectStream = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
       ssc, kafkaDirectParams, Set(kafkaConf.topic)
@@ -49,7 +51,7 @@ object SparkStreamingConsumer extends App {
       val randomRecordDF = rdd
         .toDF()
         .selectExpr(
-          "timestamp", "referrer", "action",
+          "timestamp", "timestampBucket", "referrer", "action",
           "previousPage", "visitor", "geo",
           "timeSpentSeconds", "subPage", "site",
           "props.topic as topic",
@@ -59,9 +61,9 @@ object SparkStreamingConsumer extends App {
 
       randomRecordDF
         .write
-        .partitionBy("topic", "kafkaPartition", "timestamp")
+        .partitionBy("topic", "kafkaPartition", "timestampBucket")
         .mode(SaveMode.Append)
-        .parquet(hdfsPath)
+        .parquet(dataPath)
     })
 
     ssc

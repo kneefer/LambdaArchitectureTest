@@ -33,7 +33,7 @@ object KafkaDataProducer extends App {
     kafkaTopic,
     kafkaNumOfPartitions)
 
-  for (currFileNum <- 1 to generatorConfig.numOfBatches) {
+  for (_ <- 1 to generatorConfig.numOfBatches) {
 
     val randomSleepEvery = rnd.nextInt(generatorConfig.recordsPerBatch - 1) + 1
     var timestamp = System.currentTimeMillis()
@@ -43,7 +43,7 @@ object KafkaDataProducer extends App {
       adjustedTimestamp = adjustedTimestamp + ((System.currentTimeMillis - timestamp) * generatorConfig.timeMultiplier)
       timestamp = System.currentTimeMillis
 
-      val record = getRandomRecord(adjustedTimestamp, currRecordIndex)
+      val record = getRandomRecord(timestamp, currRecordIndex)
       val recordAsLine = record.serialized
       kafkaOps.send(recordAsLine)
 
@@ -83,11 +83,11 @@ object KafkaDataProducer extends App {
     val timeSpentSeconds = rnd.nextInt(5 * 60) + 1
 
     val visitor = visitorsIds(rnd.nextInt(visitorsIds.length - 1))
-    val subpage = subpagesIds(rnd.nextInt(subpagesIds.length - 1))
+    val subPage = subpagesIds(rnd.nextInt(subpagesIds.length - 1))
     val site = sites(rnd.nextInt(sites.length - 1))
 
     val randomRecord = RandomRecord(
-      timestamp, referrer, action, previousPage, visitor, geo, timeSpentSeconds, subpage, site
+      timestamp, -1, referrer, action, previousPage, visitor, geo, timeSpentSeconds, subPage, site
     )
     randomRecord
   }

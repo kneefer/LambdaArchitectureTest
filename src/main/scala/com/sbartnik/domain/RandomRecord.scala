@@ -4,7 +4,8 @@ import com.sbartnik.common.Helpers
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.kafka.HasOffsetRanges
 
-case class RandomRecord(var timestamp: Long,
+case class RandomRecord(timestamp: Long,
+                        var timestampBucket: Long,
                         referrer: String,
                         action: String,
                         previousPage: String,
@@ -26,7 +27,7 @@ object RandomRecord {
     val record = line.split("\\t")
     if (record.length == 9)
       Some(RandomRecord(
-        record(0).toLong, record(1), record(2), record(3),
+        record(0).toLong, -1, record(1), record(2), record(3),
         record(4), record(5), record(6).toInt, record(7), record(8)))
     else
       None
@@ -42,7 +43,7 @@ object RandomRecord {
       iter.flatMap(kv => {
         val randomRecord = RandomRecord.deserialize(kv._2) match {
           case Some(x) => {
-            x.timestamp = x.timestamp / BUCKET_MS_SIZE * BUCKET_MS_SIZE
+            x.timestampBucket = x.timestamp / BUCKET_MS_SIZE * BUCKET_MS_SIZE
             x.props = Map(
               "topic" -> or.topic,
               "kafkaPartition" -> or.partition.toString,
