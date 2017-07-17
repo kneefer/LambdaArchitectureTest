@@ -16,15 +16,15 @@ import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.joda.time.{DateTime, Period}
 
-class SiteActionRecordBeamFactory extends BeamFactory[SiteActionRecord]
+class SiteActionRecordBeamFactory extends BeamFactory[ActionBySite]
 {
   // Return a singleton, so the same connection is shared across all tasks in the same JVM.
-  def makeBeam: Beam[SiteActionRecord] = SiteActionRecordBeamFactory.BeamInstance
+  def makeBeam: Beam[ActionBySite] = SiteActionRecordBeamFactory.BeamInstance
 }
 
 object SiteActionRecordBeamFactory
 {
-  val BeamInstance: Beam[SiteActionRecord] = {
+  val BeamInstance: Beam[ActionBySite] = {
     // Tranquility uses ZooKeeper (through Curator framework) for coordination.
     val curator = CuratorFrameworkFactory.newClient(
       "localhost:3002",
@@ -41,7 +41,7 @@ object SiteActionRecordBeamFactory
 
     // Expects simpleEvent.timestamp to return a Joda DateTime object.
     DruidBeams
-      .builder((simpleEvent: SiteActionRecord) => new DateTime(simpleEvent.timestamp))
+      .builder((simpleEvent: ActionBySite) => new DateTime(simpleEvent.timestampBucket))
       .curator(curator)
       .discoveryPath(discoveryPath)
       .location(DruidLocation(indexService, firehoseService, dataSource))
@@ -163,12 +163,15 @@ object SparkStreamingConsumer extends App {
       .stateSnapshots()
       .reduceByKeyAndWindow(
         (a, b) => b,
-        (x, y) => x,
+        (a, b) => a,
         Seconds(conf.streamingWindowDurationSeconds / conf.streamingBatchDurationSeconds * conf.streamingBatchDurationSeconds)
       )
 
     val mappedActionBySite = reducedActionBySite.map(x => ActionBySite(x._1._1, x._1._2, x._2._1, x._2._2, x._2._3))
     //mappedActionBySite.print(200)
+
+    import com.metamx.tranquility.spark.BeamRDD._
+    //mappedActionBySite.foreachRDD(rdd => rdd.propagate(new SiteActionRecordBeamFactory))
 
     ssc
   }
