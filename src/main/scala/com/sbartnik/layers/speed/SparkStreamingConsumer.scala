@@ -1,62 +1,12 @@
 package com.sbartnik.layers.speed
 
-import com.metamx.common.Granularity
-import com.metamx.tranquility.beam.{Beam, ClusteredBeamTuning}
-import com.metamx.tranquility.druid.{DruidBeams, DruidLocation, DruidRollup, SpecificDruidDimensions}
-import com.metamx.tranquility.spark.BeamFactory
 import com.sbartnik.config.AppConfig
 import com.sbartnik.domain.{ActionBySite, SiteActionRecord}
-import io.druid.granularity.QueryGranularities
-import io.druid.query.aggregation.LongSumAggregatorFactory
 import kafka.serializer.StringDecoder
-import org.apache.curator.framework.CuratorFrameworkFactory
-import org.apache.curator.retry.BoundedExponentialBackoffRetry
-import org.apache.spark.sql.{SaveMode, SparkSession}
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.{SQLContext, SaveMode}
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.KafkaUtils
-import org.joda.time.{DateTime, Period}
-
-class SiteActionRecordBeamFactory extends BeamFactory[ActionBySite]
-{
-  // Return a singleton, so the same connection is shared across all tasks in the same JVM.
-  def makeBeam: Beam[ActionBySite] = SiteActionRecordBeamFactory.BeamInstance
-}
-
-object SiteActionRecordBeamFactory
-{
-  val BeamInstance: Beam[ActionBySite] = {
-    // Tranquility uses ZooKeeper (through Curator framework) for coordination.
-    val curator = CuratorFrameworkFactory.newClient(
-      "localhost:3002",
-      new BoundedExponentialBackoffRetry(100, 3000, 5)
-    )
-    curator.start()
-
-    val indexService = "druid/overlord" // Your overlord's druid.service, with slashes replaced by colons.
-    val firehoseService = ""
-    val discoveryPath = "/druid/discovery"     // Your overlord's druid.discovery.curator.path
-    val dataSource = "foo"
-    val dimensions = IndexedSeq("bar")
-    val aggregators = Seq(new LongSumAggregatorFactory("baz", "baz"))
-
-    // Expects simpleEvent.timestamp to return a Joda DateTime object.
-    DruidBeams
-      .builder((simpleEvent: ActionBySite) => new DateTime(simpleEvent.timestampBucket))
-      .curator(curator)
-      .discoveryPath(discoveryPath)
-      .location(DruidLocation(indexService, firehoseService, dataSource))
-      .rollup(DruidRollup(SpecificDruidDimensions(dimensions), aggregators, QueryGranularities.MINUTE))
-      .tuning(
-        ClusteredBeamTuning(
-          segmentGranularity = Granularity.HOUR,
-          windowPeriod = new Period("PT10M"),
-          partitions = 1,
-          replicants = 1
-        )
-      )
-      .buildBeam()
-  }
-}
 
 object SparkStreamingConsumer extends App {
 
@@ -73,18 +23,16 @@ object SparkStreamingConsumer extends App {
   val streamingBatchDuration = Seconds(conf.streamingBatchDurationSeconds)
   val dataPath = conf.hdfsDataPath
 
-  val ss = SparkSession
-    .builder()
-    .appName("Spark Streaming Processing")
-    .master(conf.sparkMaster)
-    .config("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
-    .getOrCreate()
+  val sparkConf = new SparkConf()
+    .setAppName("Spark Streaming Processing")
+    .setMaster(AppConfig.sparkMaster)
+    .set("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
 
-  import ss.implicits._
-
-  var sc = ss.sparkContext
+  val sc = SparkContext.getOrCreate(sparkConf)
+  val sqlc = SQLContext.getOrCreate(sc)
   sc.setCheckpointDir(checkpointDirectory)
-  val sqlc = ss.sqlContext
+
+  import sqlc.implicits._
 
   def sparkStreamingCreateFunction(): StreamingContext = {
     val ssc = new StreamingContext(sc, streamingBatchDuration)
@@ -131,7 +79,7 @@ object SparkStreamingConsumer extends App {
           case _ => (0L, 0L, 0L)
         }
 
-        favCount += newVal._1
+        favCount  += newVal._1
         commCount += newVal._2
         viewCount += newVal._3
 
@@ -169,9 +117,6 @@ object SparkStreamingConsumer extends App {
 
     val mappedActionBySite = reducedActionBySite.map(x => ActionBySite(x._1._1, x._1._2, x._2._1, x._2._2, x._2._3))
     //mappedActionBySite.print(200)
-
-    import com.metamx.tranquility.spark.BeamRDD._
-    //mappedActionBySite.foreachRDD(rdd => rdd.propagate(new SiteActionRecordBeamFactory))
 
     ssc
   }

@@ -1,22 +1,22 @@
 package com.sbartnik.layers.batch
 
 import com.sbartnik.config.AppConfig
-import org.apache.spark.sql.{SaveMode, SparkSession}
+import org.apache.hadoop.hive.ql.exec.spark.session.SparkSession
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.{SQLContext, SaveMode}
 
 object BatchHdfsJob extends App {
 
   val conf = AppConfig
   val batchImagesPath = conf.hdfsBatchImagesPath
 
-  val ss = SparkSession
-    .builder()
-    .appName("Spark Batch Processing")
-    .master(AppConfig.sparkMaster)
-    .config("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
-    .getOrCreate()
+  val sparkConf = new SparkConf()
+      .setAppName("Spark Batch Processing")
+      .setMaster(AppConfig.sparkMaster)
+      .set("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
 
-  val sc = ss.sparkContext
-  val sqlc = ss.sqlContext
+  val sc = SparkContext.getOrCreate(sparkConf)
+  val sqlc = SQLContext.getOrCreate(sc)
 
   val dfToProcess = sqlc.read.parquet(conf.hdfsDataPath)
       .where("unix_timestamp() - timestampBucket / 1000 <= 60 * 60 * 1")
