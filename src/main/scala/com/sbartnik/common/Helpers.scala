@@ -1,16 +1,17 @@
 package com.sbartnik.common
 
-import java.util.{Collections, Properties}
-import java.util.stream.Collectors
+import java.util.Properties
 
-import net.liftweb.json.{DefaultFormats, JValue, Serialization, parse}
+import net.liftweb.json.{DefaultFormats, JValue, Serialization, ShortTypeHints, parse => liftParser}
 
 import scala.io.Source
 import scala.language.implicitConversions
 
-object Helpers {
+trait Helpers {
 
-  private implicit val formats = DefaultFormats
+  implicit protected val formats = Serialization.formats(ShortTypeHints(List()))
+  protected def write[T <: AnyRef](value: T): String = Serialization.write(value)
+  protected def parse(value: String): JValue = liftParser(value)
 
   def getLinesFromResourceFile(resFileName: String): Array[String] =
     Source.fromInputStream(getClass.getResourceAsStream(s"/$resFileName")).getLines.toArray
@@ -21,3 +22,4 @@ object Helpers {
     }
   }
 }
+object Helpers extends Helpers

@@ -1,14 +1,11 @@
 package com.sbartnik.layers.batch
 
-import com.sbartnik.common.CassandraOperations
 import com.sbartnik.config.AppConfig
 import org.apache.spark.sql.{SaveMode, SparkSession}
 
 class BatchJob extends App {
 
   val conf = AppConfig
-
-  //val cassandraSession = CassandraOperations.getInitializedSession
 
   val ss = SparkSession
     .builder()

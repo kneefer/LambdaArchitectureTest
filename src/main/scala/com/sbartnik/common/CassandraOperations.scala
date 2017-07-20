@@ -3,7 +3,7 @@ package com.sbartnik.common
 import com.datastax.driver.core.{Cluster, ConsistencyLevel, QueryOptions, Session}
 import com.sbartnik.config.AppConfig
 
-object CassandraOperations {
+trait CassandraOperations {
 
   private val conf = AppConfig.Cassandra
 
@@ -55,3 +55,4 @@ object CassandraOperations {
     session
   }
 }
+object CassandraOperations extends CassandraOperations

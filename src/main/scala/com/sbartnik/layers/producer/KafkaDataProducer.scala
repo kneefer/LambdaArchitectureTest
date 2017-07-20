@@ -1,15 +1,14 @@
 package com.sbartnik.layers.producer
 
 import com.sbartnik.config.{AppConfig, ConfigurationProvider}
-import com.sbartnik.common.Helpers._
-import com.sbartnik.common.KafkaProducerOperations
+import com.sbartnik.common.{Helpers, KafkaProducerOperations}
 import com.sbartnik.domain.SiteActionRecord
 import com.typesafe.scalalogging.LazyLogging
 import org.slf4j.LoggerFactory
 
 import scala.util.Random
 
-object KafkaDataProducer extends App with LazyLogging {
+object KafkaDataProducer extends App with LazyLogging with Helpers {
 
   // Configurations
   val kafkaProducerConfigProps = ConfigurationProvider.kafkaProducer

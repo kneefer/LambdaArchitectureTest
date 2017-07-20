@@ -3,7 +3,6 @@ package com.sbartnik.common
 import java.util.Properties
 
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.slf4j.LoggerFactory
 import com.sbartnik.common.Helpers._
 import com.typesafe.scalalogging.LazyLogging
 
