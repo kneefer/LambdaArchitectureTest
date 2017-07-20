@@ -20,14 +20,30 @@ object CassandraOperations {
 
     session.execute(s"USE ${conf.keyspaceName}")
 
-    session.execute(s"CREATE TABLE IF NOT EXISTS ${conf.tables.get(0)} (" + // uniqueVisitorsBySite
+    session.execute(s"CREATE TABLE IF NOT EXISTS ${conf.batchUniqueVisitorsBySiteTable} (" +
       s"timestamp_bucket bigint, " +
       s"site text, " +
       s"unique_visitors bigint, " +
       s"PRIMARY KEY (site, timestamp_bucket)" +
       s") WITH CLUSTERING ORDER BY (timestamp_bucket DESC)")
 
-    session.execute(s"CREATE TABLE IF NOT EXISTS ${conf.tables.get(1)} (" + // actionsBySite
+    session.execute(s"CREATE TABLE IF NOT EXISTS ${conf.batchActionsBySiteTable} (" +
+      s"timestamp_bucket bigint, " +
+      s"site text," +
+      s"fav_count bigint, " +
+      s"comm_count bigint, " +
+      s"view_count bigint, " +
+      s"PRIMARY KEY (site, timestamp_bucket)" +
+      s") WITH CLUSTERING ORDER BY (timestamp_bucket DESC)")
+
+    session.execute(s"CREATE TABLE IF NOT EXISTS ${conf.speedUniqueVisitorsBySiteTable} (" +
+      s"timestamp_bucket bigint, " +
+      s"site text, " +
+      s"unique_visitors bigint, " +
+      s"PRIMARY KEY (site, timestamp_bucket)" +
+      s") WITH CLUSTERING ORDER BY (timestamp_bucket DESC)")
+
+    session.execute(s"CREATE TABLE IF NOT EXISTS ${conf.speedActionsBySiteTable} (" +
       s"timestamp_bucket bigint, " +
       s"site text," +
       s"fav_count bigint, " +

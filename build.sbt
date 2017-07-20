@@ -29,7 +29,6 @@ lazy val deps = Seq(
   sparkHive,
   sparkStreamingKafka,
   sparkCassandraConnect,
-  cassandraDriver,
   logback,
   akkaHttpJson,
   jansi,

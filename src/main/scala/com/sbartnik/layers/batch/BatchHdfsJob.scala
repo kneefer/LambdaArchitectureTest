@@ -52,7 +52,7 @@ object BatchHdfsJob extends App {
   uniqueVisitorsBySite
     .write
     .format("org.apache.spark.sql.cassandra")
-    .options(Map("keyspace" -> conf.Cassandra.keyspaceName, "table" -> conf.Cassandra.tables.get(0)))
+    .options(Map("keyspace" -> conf.Cassandra.keyspaceName, "table" -> conf.Cassandra.batchUniqueVisitorsBySiteTable))
     .save()
 
   //////////////////////////
@@ -80,6 +80,6 @@ object BatchHdfsJob extends App {
   actionsBySite
     .write
     .format("org.apache.spark.sql.cassandra")
-    .options(Map("keyspace" -> conf.Cassandra.keyspaceName, "table" -> conf.Cassandra.tables.get(1)))
+    .options(Map("keyspace" -> conf.Cassandra.keyspaceName, "table" -> conf.Cassandra.batchActionsBySiteTable))
     .save()
 }

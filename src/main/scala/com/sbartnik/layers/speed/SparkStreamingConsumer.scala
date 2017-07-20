@@ -124,7 +124,7 @@ object SparkStreamingConsumer extends App {
       )
 
     val mappedActionBySite = reducedActionBySite.map(x => ActionBySite(x._1._1, x._1._2, x._2._1, x._2._2, x._2._3))
-    mappedActionBySite.saveToCassandra(conf.Cassandra.keyspaceName, conf.Cassandra.tables.get(1))
+    mappedActionBySite.saveToCassandra(conf.Cassandra.keyspaceName, conf.Cassandra.speedActionsBySiteTable)
     //mappedActionBySite.print(200)
 
     ssc

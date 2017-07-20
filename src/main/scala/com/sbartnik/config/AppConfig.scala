@@ -20,7 +20,10 @@ object AppConfig {
     val host: String = cassandraConfig.getString("host")
     val userName: String = cassandraConfig.getString("userName")
     val keyspaceName: String = cassandraConfig.getString("keyspaceName")
-    val tables: java.util.List[String] = cassandraConfig.getStringList("tables")
+    val batchUniqueVisitorsBySiteTable : String = cassandraConfig.getStringList("tables").get(0)
+    val batchActionsBySiteTable : String = cassandraConfig.getStringList("tables").get(1)
+    val speedUniqueVisitorsBySiteTable : String = cassandraConfig.getStringList("tables").get(2)
+    val speedActionsBySiteTable : String = cassandraConfig.getStringList("tables").get(3)
   }
 
   object Kafka {
