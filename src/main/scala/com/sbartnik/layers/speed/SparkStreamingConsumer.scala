@@ -98,12 +98,11 @@ object SparkStreamingConsumer extends App {
         (a, b) => b,
         (a, b) => a,
         Seconds(conf.streamingWindowDurationSeconds / conf.streamingBatchDurationSeconds * conf.streamingBatchDurationSeconds)
-        //filterFunc = _ => false
       )
 
     val mappedUniqueVisitorsBySite = reducedUniqueVisitorsBySite.map(x => UniqueVisitorsBySite(x._1._1, x._1._2, x._2.approximateSize.estimate))
     mappedUniqueVisitorsBySite.saveToCassandra(conf.Cassandra.keyspaceName, conf.Cassandra.speedUniqueVisitorsBySiteTable)
-    mappedUniqueVisitorsBySite.print(200)
+    //mappedUniqueVisitorsBySite.print(200)
 
     //////////////////////////
     // Compute action by site
@@ -151,12 +150,11 @@ object SparkStreamingConsumer extends App {
         (a, b) => b,
         (a, b) => a,
         Seconds(conf.streamingWindowDurationSeconds / conf.streamingBatchDurationSeconds * conf.streamingBatchDurationSeconds)
-        //filterFunc = _ => false
       )
 
     val mappedActionBySite = reducedActionBySite.map(x => ActionBySite(x._1._1, x._1._2, x._2._1, x._2._2, x._2._3))
     mappedActionBySite.saveToCassandra(conf.Cassandra.keyspaceName, conf.Cassandra.speedActionsBySiteTable)
-    mappedActionBySite.print(200)
+    //mappedActionBySite.print(200)
 
     ssc
   }
