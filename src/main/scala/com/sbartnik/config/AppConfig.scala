@@ -8,7 +8,6 @@ object AppConfig {
 
   val sparkMaster: String = appConfig.getString("sparkMaster")
   val hdfsDataPath: String = appConfig.getString("hdfsDataPath")
-  val hdfsBatchImagesPath: String = appConfig.getString("hdfsBatchImagesPath")
   val streamingBatchDurationSeconds: Int = appConfig.getInt("streamingBatchDurationSeconds")
   val streamingWindowDurationSeconds: Int = appConfig.getInt("streamingWindowDurationSeconds")
   val checkpointDir: String = appConfig.getString("checkpointDir")

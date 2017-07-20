@@ -1,7 +1,7 @@
-import com.sbartnik.layers.batch.BatchHdfsJob
+import com.sbartnik.layers.batch.BatchJob
 
 object BatchLayerRunner {
   def main(args: Array[String]) {
-    BatchHdfsJob.main(args)
+    BatchJob.main(args)
   }
 }

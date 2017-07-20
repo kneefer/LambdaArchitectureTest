@@ -35,7 +35,7 @@ object KafkaDataProducer extends App {
 
   for (_ <- 1 to generatorConfig.numOfBatches) {
 
-    val randomSleepEvery = rnd.nextInt(generatorConfig.recordsPerBatch - 1) + 1
+    val randomSleepEvery = rnd.nextInt(5000) + 2000
     var timestamp = System.currentTimeMillis()
     var adjustedTimestamp = timestamp
 
@@ -50,14 +50,14 @@ object KafkaDataProducer extends App {
       if(currRecordIndex % randomSleepEvery == 0) {
         logger.info(s"Sent $currRecordIndex messages")
         val sleepTime = rnd.nextInt(randomSleepEvery)
-        logger.info(s"Sleeping for $sleepTime ms")
+        logger.info(s"Sleeping for $sleepTime ms (random sleep)")
         Thread.sleep(sleepTime)
       }
     }
 
-    val sleepAfterEachFile = generatorConfig.sleepAfterEachFileMs
-    logger.info(s"Sleeping for $sleepAfterEachFile ms")
-    Thread.sleep(sleepAfterEachFile)
+    val sleepAfterEachBatch = generatorConfig.sleepAfterEachFileMs
+    logger.info(s"Sleeping for $sleepAfterEachBatch ms (after batch)")
+    Thread.sleep(sleepAfterEachBatch)
   }
 
   def getRandomSiteActionRecord(timestamp: Long, currRecordIndex: Int): SiteActionRecord = {

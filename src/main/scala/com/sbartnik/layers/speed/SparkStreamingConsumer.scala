@@ -6,7 +6,6 @@ import kafka.serializer.StringDecoder
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.KafkaUtils
-import com.datastax.spark.connector._
 import com.datastax.spark.connector.streaming._
 import com.twitter.algebird.{HLL, HyperLogLogMonoid}
 
@@ -102,6 +101,7 @@ object SparkStreamingConsumer extends App {
 
     val mappedUniqueVisitorsBySite = reducedUniqueVisitorsBySite.map(x => UniqueVisitorsBySite(x._1._1, x._1._2, x._2.approximateSize.estimate))
     mappedUniqueVisitorsBySite.saveToCassandra(conf.Cassandra.keyspaceName, conf.Cassandra.speedUniqueVisitorsBySiteTable)
+
     //mappedUniqueVisitorsBySite.print(200)
 
     //////////////////////////
@@ -154,6 +154,7 @@ object SparkStreamingConsumer extends App {
 
     val mappedActionBySite = reducedActionBySite.map(x => ActionBySite(x._1._1, x._1._2, x._2._1, x._2._2, x._2._3))
     mappedActionBySite.saveToCassandra(conf.Cassandra.keyspaceName, conf.Cassandra.speedActionsBySiteTable)
+
     //mappedActionBySite.print(200)
 
     ssc

@@ -2,13 +2,11 @@ package com.sbartnik.layers.batch
 
 import com.sbartnik.common.CassandraOperations
 import com.sbartnik.config.AppConfig
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{SQLContext, SaveMode, SparkSession}
+import org.apache.spark.sql.{SaveMode, SparkSession}
 
-object BatchHdfsJob extends App {
+object BatchJob extends App {
 
   val conf = AppConfig
-  //val batchImagesPath = conf.hdfsBatchImagesPath
 
   //val cassandraSession = CassandraOperations.getInitializedSession
 
@@ -26,7 +24,7 @@ object BatchHdfsJob extends App {
   val sqlc = ss.sqlContext
 
   val dfToProcess = sqlc.read.parquet(conf.hdfsDataPath)
-      //.where("unix_timestamp() - timestampBucket / 1000 <= 60 * 60 * 1")
+      .where("unix_timestamp() - timestampBucket / 1000 <= 60 * 60 * 1")
 
   dfToProcess.createOrReplaceTempView("records")
 
@@ -43,14 +41,9 @@ object BatchHdfsJob extends App {
 
   //uniqueVisitorsBySite.show(500)
 
-//  uniqueVisitorsBySite
-//    .write
-//    .mode(SaveMode.Append)
-//    .partitionBy("timestampBucket")
-//    .parquet(batchImagesPath + "/uniqueVisitorsBySite")
-
   uniqueVisitorsBySite
     .write
+    .mode(SaveMode.Append)
     .format("org.apache.spark.sql.cassandra")
     .options(Map("keyspace" -> conf.Cassandra.keyspaceName, "table" -> conf.Cassandra.batchUniqueVisitorsBySiteTable))
     .save()
@@ -71,14 +64,9 @@ object BatchHdfsJob extends App {
 
   //actionsBySite.show(500)
 
-//  actionsBySite
-//    .write
-//    .mode(SaveMode.Append)
-//    .partitionBy("timestampBucket")
-//    .parquet(batchImagesPath + "/actionsBySite")
-
   actionsBySite
     .write
+    .mode(SaveMode.Append)
     .format("org.apache.spark.sql.cassandra")
     .options(Map("keyspace" -> conf.Cassandra.keyspaceName, "table" -> conf.Cassandra.batchActionsBySiteTable))
     .save()
