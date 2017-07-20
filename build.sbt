@@ -33,8 +33,7 @@ lazy val deps = Seq(
   akkaHttpJson,
   jansi,
   json4s,
-  tranquilityCore,
-  tranquilitySpark
+  twitterAlgebird
 )
 
 lazy val root = (project in file("."))

@@ -12,6 +12,7 @@ object AppConfig {
   val streamingBatchDurationSeconds: Int = appConfig.getInt("streamingBatchDurationSeconds")
   val streamingWindowDurationSeconds: Int = appConfig.getInt("streamingWindowDurationSeconds")
   val checkpointDir: String = appConfig.getString("checkpointDir")
+  val hllBitsCount: Int = appConfig.getInt("hllBitsCount")
 
   object Cassandra {
     private val cassandraConfig = appConfig.getConfig("cassandra")

@@ -18,6 +18,5 @@ object Dependencies {
   val akkaHttpJson =            "de.heikoseeberger" %% "akka-http-json4s" % "1.7.0"
   val json4s =                  "org.json4s" %% "json4s-native" % "3.3.0"
   val jansi =                   "org.fusesource.jansi" % "jansi" % "1.12"
-  val tranquilityCore =         "io.druid" %% "tranquility-core" % "0.8.2"
-  val tranquilitySpark =        "io.druid" %% "tranquility-spark" % "0.8.2"
+  val twitterAlgebird =         "com.twitter" %% "algebird-core" % "0.11.0"
 }
