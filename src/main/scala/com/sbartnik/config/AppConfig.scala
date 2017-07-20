@@ -17,10 +17,10 @@ object AppConfig {
     private val cassandraConfig = appConfig.getConfig("cassandra")
 
     val port: Int = cassandraConfig.getInt("port")
-    val hosts: java.util.List[String] = cassandraConfig.getStringList("hosts")
-    val writeConsistency: String = cassandraConfig.getString("writeConsistency")
-    val readConsistency: String = cassandraConfig.getString("readConsistency")
-    val replicationFactor: Int = cassandraConfig.getInt("replicationFactor")
+    val host: String = cassandraConfig.getString("host")
+    val userName: String = cassandraConfig.getString("userName")
+    val keyspaceName: String = cassandraConfig.getString("keyspaceName")
+    val tables: java.util.List[String] = cassandraConfig.getStringList("tables")
   }
 
   object Kafka {
@@ -43,32 +43,18 @@ object AppConfig {
       val valueSerializerClass: String = kafkaProducerConfig.getString("valueSerializerClass")
     }
 
-    object HdfsConsumer {
-      private val fileSystemConsumerConfig = kafkaConfig.getConfig("hdfsConsumer")
+    object StreamConsumer {
+      private val streamConsumerConf = kafkaConfig.getConfig("streamConsumer")
 
-      val groupId: String = fileSystemConsumerConfig.getString("groupId")
-      val clientId: String = fileSystemConsumerConfig.getString("clientId")
-      val zookeeperConnect: String = fileSystemConsumerConfig.getString("zookeeperConnect")
-      val enableAutoCommit: String = fileSystemConsumerConfig.getString("enableAutoCommit")
-      val autoOffsetReset: String = fileSystemConsumerConfig.getString("autoOffsetReset")
-      val consumerTimeoutMs: Int = fileSystemConsumerConfig.getInt("consumerTimeoutMs")
-      val autoCommitIntervalMs: Int = fileSystemConsumerConfig.getInt("autoCommitIntervalMs")
-      val keyDeserializerClass: String = fileSystemConsumerConfig.getString("keyDeserializerClass")
-      val valueDeserializerClass: String = fileSystemConsumerConfig.getString("valueDeserializerClass")
-    }
-
-    object BatchConsumer {
-      private val fileSystemConsumerConfig = kafkaConfig.getConfig("batchConsumer")
-
-      val groupId: String = fileSystemConsumerConfig.getString("groupId")
-      val clientId: String = fileSystemConsumerConfig.getString("clientId")
-      val zookeeperConnect: String = fileSystemConsumerConfig.getString("zookeeperConnect")
-      val enableAutoCommit: String = fileSystemConsumerConfig.getString("enableAutoCommit")
-      val autoOffsetReset: String = fileSystemConsumerConfig.getString("autoOffsetReset")
-      val consumerTimeoutMs: Int = fileSystemConsumerConfig.getInt("consumerTimeoutMs")
-      val autoCommitIntervalMs: Int = fileSystemConsumerConfig.getInt("autoCommitIntervalMs")
-      val keyDeserializerClass: String = fileSystemConsumerConfig.getString("keyDeserializerClass")
-      val valueDeserializerClass: String = fileSystemConsumerConfig.getString("valueDeserializerClass")
+      val groupId: String = streamConsumerConf.getString("groupId")
+      val clientId: String = streamConsumerConf.getString("clientId")
+      val zookeeperConnect: String = streamConsumerConf.getString("zookeeperConnect")
+      val enableAutoCommit: String = streamConsumerConf.getString("enableAutoCommit")
+      val autoOffsetReset: String = streamConsumerConf.getString("autoOffsetReset")
+      val consumerTimeoutMs: Int = streamConsumerConf.getInt("consumerTimeoutMs")
+      val autoCommitIntervalMs: Int = streamConsumerConf.getInt("autoCommitIntervalMs")
+      val keyDeserializerClass: String = streamConsumerConf.getString("keyDeserializerClass")
+      val valueDeserializerClass: String = streamConsumerConf.getString("valueDeserializerClass")
     }
   }
 

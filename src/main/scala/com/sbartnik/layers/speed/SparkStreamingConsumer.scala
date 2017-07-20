@@ -3,10 +3,12 @@ package com.sbartnik.layers.speed
 import com.sbartnik.config.AppConfig
 import com.sbartnik.domain.{ActionBySite, SiteActionRecord}
 import kafka.serializer.StringDecoder
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{SQLContext, SaveMode}
+import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.KafkaUtils
+
+import com.datastax.spark.connector._
+import com.datastax.spark.connector.streaming._
 
 object SparkStreamingConsumer extends App {
 
@@ -15,24 +17,26 @@ object SparkStreamingConsumer extends App {
 
   val kafkaDirectParams = Map(
     "metadata.broker.list" -> kafkaConf.Producer.bootstrapServers,
-    "group.id" -> kafkaConf.HdfsConsumer.groupId,
-    "auto.offset.reset" -> kafkaConf.HdfsConsumer.autoOffsetReset
+    "group.id" -> kafkaConf.StreamConsumer.groupId,
+    "auto.offset.reset" -> kafkaConf.StreamConsumer.autoOffsetReset
   )
 
   val checkpointDirectory = conf.checkpointDir
   val streamingBatchDuration = Seconds(conf.streamingBatchDurationSeconds)
   val dataPath = conf.hdfsDataPath
 
-  val sparkConf = new SparkConf()
-    .setAppName("Spark Streaming Processing")
-    .setMaster(AppConfig.sparkMaster)
-    .set("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
+  val ss = SparkSession
+    .builder()
+    .appName("Spark Streaming Processing")
+    .master(conf.sparkMaster)
+    .config("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
+    .getOrCreate()
 
-  val sc = SparkContext.getOrCreate(sparkConf)
-  val sqlc = SQLContext.getOrCreate(sc)
+  import ss.implicits._
+
+  var sc = ss.sparkContext
   sc.setCheckpointDir(checkpointDirectory)
-
-  import sqlc.implicits._
+  val sqlc = ss.sqlContext
 
   def sparkStreamingCreateFunction(): StreamingContext = {
     val ssc = new StreamingContext(sc, streamingBatchDuration)
@@ -68,6 +72,10 @@ object SparkStreamingConsumer extends App {
     })
 
     //////////////////////////
+    // Compute unique visitors
+    //////////////////////////
+
+    //////////////////////////
     // Compute action by site
     //////////////////////////
 
@@ -90,10 +98,10 @@ object SparkStreamingConsumer extends App {
     val actionBySite = siteActionRecordStream.transform(rdd => {
       rdd.toDF().createOrReplaceTempView("records")
       val actionsBySite = sqlc.sql(
-        """SELECT site, timestampBucket,
-            |SUM(CASE WHEN action = 'add_to_favorites' THEN 1 ELSE 0 END) as favCount,
-            |SUM(CASE WHEN action = 'comment' THEN 1 ELSE 0 END) as commCount,
-            |SUM(CASE WHEN action = 'page_view' THEN 1 ELSE 0 END) as viewCount
+        """SELECT site, timestamp_bucket,
+            |SUM(CASE WHEN action = 'add_to_favorites' THEN 1 ELSE 0 END) as fav_count,
+            |SUM(CASE WHEN action = 'comment' THEN 1 ELSE 0 END) as comm_count,
+            |SUM(CASE WHEN action = 'page_view' THEN 1 ELSE 0 END) as view_count
           |FROM records
           |GROUP BY site, timestampBucket
           |ORDER BY site
@@ -116,6 +124,7 @@ object SparkStreamingConsumer extends App {
       )
 
     val mappedActionBySite = reducedActionBySite.map(x => ActionBySite(x._1._1, x._1._2, x._2._1, x._2._2, x._2._3))
+    mappedActionBySite.saveToCassandra(conf.Cassandra.keyspaceName, conf.Cassandra.tables.get(1))
     //mappedActionBySite.print(200)
 
     ssc

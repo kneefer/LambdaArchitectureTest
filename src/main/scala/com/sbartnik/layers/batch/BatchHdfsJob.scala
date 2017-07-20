@@ -1,48 +1,69 @@
 package com.sbartnik.layers.batch
 
+import com.sbartnik.common.CassandraOperations
 import com.sbartnik.config.AppConfig
-import org.apache.hadoop.hive.ql.exec.spark.session.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{SQLContext, SaveMode}
+import org.apache.spark.sql.{SQLContext, SaveMode, SparkSession}
 
 object BatchHdfsJob extends App {
 
   val conf = AppConfig
-  val batchImagesPath = conf.hdfsBatchImagesPath
+  //val batchImagesPath = conf.hdfsBatchImagesPath
 
-  val sparkConf = new SparkConf()
-      .setAppName("Spark Batch Processing")
-      .setMaster(AppConfig.sparkMaster)
-      .set("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
+  //val cassandraSession = CassandraOperations.getInitializedSession
 
-  val sc = SparkContext.getOrCreate(sparkConf)
-  val sqlc = SQLContext.getOrCreate(sc)
+  val ss = SparkSession
+    .builder()
+    .appName("Spark Batch Processing")
+    .master(AppConfig.sparkMaster)
+    .config("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
+    .config("spark.casandra.connection.host", conf.Cassandra.host)
+    .config("spark.casandra.connection.port", conf.Cassandra.port)
+    .config("spark.cassandra.auth.username", conf.Cassandra.userName)
+    .getOrCreate()
+
+  val sc = ss.sparkContext
+  val sqlc = ss.sqlContext
 
   val dfToProcess = sqlc.read.parquet(conf.hdfsDataPath)
-      .where("unix_timestamp() - timestampBucket / 1000 <= 60 * 60 * 1")
+      //.where("unix_timestamp() - timestampBucket / 1000 <= 60 * 60 * 1")
 
   dfToProcess.createOrReplaceTempView("records")
 
+  //////////////////////////
+  // Compute unique visitors
+  //////////////////////////
+
   val uniqueVisitorsBySite = sqlc.sql(
-    """SELECT site, timestampBucket,
-        |COUNT(DISTINCT visitor) as uniqueVisitors
+    """SELECT site, timestampBucket as timestamp_bucket,
+        |COUNT(DISTINCT visitor) as unique_visitors
       |FROM records
       |GROUP BY site, timestampBucket
     """.stripMargin)
 
   //uniqueVisitorsBySite.show(500)
 
+//  uniqueVisitorsBySite
+//    .write
+//    .mode(SaveMode.Append)
+//    .partitionBy("timestampBucket")
+//    .parquet(batchImagesPath + "/uniqueVisitorsBySite")
+
   uniqueVisitorsBySite
     .write
-    .mode(SaveMode.Append)
-    .partitionBy("timestampBucket")
-    .parquet(batchImagesPath + "/uniqueVisitorsBySite")
+    .format("org.apache.spark.sql.cassandra")
+    .options(Map("keyspace" -> conf.Cassandra.keyspaceName, "table" -> conf.Cassandra.tables.get(0)))
+    .save()
+
+  //////////////////////////
+  // Compute action by site
+  //////////////////////////
 
   val actionsBySite = sqlc.sql(
-    """SELECT site, timestampBucket,
-        |SUM(CASE WHEN action = 'add_to_favorites' THEN 1 ELSE 0 END) as favCount,
-        |SUM(CASE WHEN action = 'comment' THEN 1 ELSE 0 END) as commCount,
-        |SUM(CASE WHEN action = 'page_view' THEN 1 ELSE 0 END) as viewCount
+    """SELECT site, timestampBucket as timestamp_bucket,
+        |SUM(CASE WHEN action = 'add_to_favorites' THEN 1 ELSE 0 END) as fav_count,
+        |SUM(CASE WHEN action = 'comment' THEN 1 ELSE 0 END) as comm_count,
+        |SUM(CASE WHEN action = 'page_view' THEN 1 ELSE 0 END) as view_count
       |FROM records
       |GROUP BY site, timestampBucket
     """.stripMargin
@@ -50,9 +71,15 @@ object BatchHdfsJob extends App {
 
   //actionsBySite.show(500)
 
+//  actionsBySite
+//    .write
+//    .mode(SaveMode.Append)
+//    .partitionBy("timestampBucket")
+//    .parquet(batchImagesPath + "/actionsBySite")
+
   actionsBySite
     .write
-    .mode(SaveMode.Append)
-    .partitionBy("timestampBucket")
-    .parquet(batchImagesPath + "/actionsBySite")
+    .format("org.apache.spark.sql.cassandra")
+    .options(Map("keyspace" -> conf.Cassandra.keyspaceName, "table" -> conf.Cassandra.tables.get(1)))
+    .save()
 }
