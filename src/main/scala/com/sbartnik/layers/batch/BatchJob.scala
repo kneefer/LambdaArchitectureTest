@@ -4,7 +4,7 @@ import com.sbartnik.common.CassandraOperations
 import com.sbartnik.config.AppConfig
 import org.apache.spark.sql.{SaveMode, SparkSession}
 
-object BatchJob extends App {
+class BatchJob extends App {
 
   val conf = AppConfig
 
@@ -24,7 +24,7 @@ object BatchJob extends App {
   val sqlc = ss.sqlContext
 
   val dfToProcess = sqlc.read.parquet(conf.hdfsDataPath)
-      .where("unix_timestamp() - timestampBucket / 1000 <= 60 * 60 * 1")
+    .where("unix_timestamp() - timestampBucket / 1000 <= 60 * 60 * 1")
 
   dfToProcess.createOrReplaceTempView("records")
 

@@ -18,6 +18,7 @@ object AppConfig {
 
     val port: Int = cassandraConfig.getInt("port")
     val host: String = cassandraConfig.getString("host")
+    val keepAliveMs: Int = cassandraConfig.getInt("keepAliveMs")
     val userName: String = cassandraConfig.getString("userName")
     val keyspaceName: String = cassandraConfig.getString("keyspaceName")
     val batchUniqueVisitorsBySiteTable : String = cassandraConfig.getStringList("tables").get(0)

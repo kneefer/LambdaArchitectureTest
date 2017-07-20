@@ -1,6 +1,6 @@
 import com.sbartnik.layers.speed.SparkStreamingConsumer
 
-object SpeedLayerRunner {
+object SpeedJobRunner {
   def main(args: Array[String]) {
     SparkStreamingConsumer.main(args)
   }

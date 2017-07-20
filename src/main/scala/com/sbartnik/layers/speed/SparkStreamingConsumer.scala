@@ -29,6 +29,10 @@ object SparkStreamingConsumer extends App {
     .appName("Spark Streaming Processing")
     .master(conf.sparkMaster)
     .config("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
+    .config("spark.casandra.connection.host", conf.Cassandra.host)
+    .config("spark.casandra.connection.port", conf.Cassandra.port)
+    .config("spark.cassandra.auth.username", conf.Cassandra.userName)
+    .config("spark.cassandra.connection.keep_alive_ms", conf.Cassandra.keepAliveMs)
     .getOrCreate()
 
   import ss.implicits._

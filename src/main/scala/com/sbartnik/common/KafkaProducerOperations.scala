@@ -5,12 +5,12 @@ import java.util.Properties
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.slf4j.LoggerFactory
 import com.sbartnik.common.Helpers._
+import com.typesafe.scalalogging.LazyLogging
+
 import scala.language.reflectiveCalls
 import scala.util.Random
 
-class KafkaProducerOperations(configProps: Properties, topic: String, numOfPartitions: Int) {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
+class KafkaProducerOperations(configProps: Properties, topic: String, numOfPartitions: Int) extends LazyLogging {
 
   private val kafkaProducer = new KafkaProducer[String, String](configProps)
   logger.info(s"Initialized KafkaProducerOperations with topic '$topic' and properties: ${configProps.format}")

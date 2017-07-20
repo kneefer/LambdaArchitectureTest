@@ -1,10 +1,8 @@
 package com.sbartnik.common
 
-import org.slf4j.{ Logger, LoggerFactory }
+import com.typesafe.scalalogging.LazyLogging
 
-trait LoggerUtil {
-  val logger: Logger = LoggerFactory.getLogger(this.getClass)
-
+trait LoggerUtil extends LazyLogging {
   def info(message: String): Unit = {
     logger.info(message)
   }

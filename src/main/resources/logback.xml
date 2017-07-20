@@ -8,7 +8,7 @@
     <logger name="com.sbartnik" level="info">
         <appender-ref ref="CONSOLE" />
     </logger>
-    <root level="error">
-        <appender-ref ref="EMAIL" />
+    <root level="info">
+        <appender-ref ref="CONSOLE" />
     </root>
 </configuration>

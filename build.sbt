@@ -30,6 +30,7 @@ lazy val deps = Seq(
   sparkStreamingKafka,
   sparkCassandraConnect,
   logback,
+  scalaLogging,
   akkaHttpJson,
   jansi,
   json4s,
@@ -40,5 +41,6 @@ lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
     name := "LambdaArchitectureTest",
-    libraryDependencies ++= deps
+    libraryDependencies ++= deps,
+    libraryDependencies ~= { _.map(_.exclude("org.slf4j", "slf4j-log4j12"))}
   )
