@@ -43,7 +43,7 @@ object SiteActionRecord {
     input.mapPartitionsWithIndex((index, iter) => {
       val or = offsetRanges(index)
       iter.flatMap(kv => {
-        val siteActionRecord = SiteActionRecord.deserialize(kv._2) match {
+        val siteActionRecord = deserialize(kv._2) match {
           case Some(x) =>
             x.timestampBucket = x.timestamp / bucketMsSize * bucketMsSize
             x.props = Map(

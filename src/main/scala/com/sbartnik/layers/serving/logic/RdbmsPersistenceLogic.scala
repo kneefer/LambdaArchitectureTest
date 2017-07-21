@@ -2,7 +2,7 @@ package com.sbartnik.layers.serving.logic
 
 import com.sbartnik.domain.{ActionBySite, UniqueVisitorsBySite}
 
-object RdbmsBusinessLogic extends BusinessLogic {
+object RdbmsPersistenceLogic extends PersistenceLogic {
 
   override def getSiteActions(siteName: String, bucketsNumber: Int): List[ActionBySite] = {
     List(ActionBySite(s"rdbms $siteName", bucketsNumber, 456, 789, 234))

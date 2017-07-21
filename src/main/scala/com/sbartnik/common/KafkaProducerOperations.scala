@@ -1,11 +1,9 @@
 package com.sbartnik.common
 
 import java.util.Properties
-
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import com.sbartnik.common.Helpers._
 import com.typesafe.scalalogging.LazyLogging
-
 import scala.language.reflectiveCalls
 import scala.util.Random
 

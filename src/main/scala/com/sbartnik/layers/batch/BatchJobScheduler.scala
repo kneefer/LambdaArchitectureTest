@@ -2,7 +2,6 @@ package com.sbartnik.layers.batch
 
 import akka.actor.{Actor, ActorSystem, Props}
 import com.sbartnik.config.AppConfig
-
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 

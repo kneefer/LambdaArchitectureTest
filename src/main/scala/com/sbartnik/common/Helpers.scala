@@ -1,9 +1,7 @@
 package com.sbartnik.common
 
 import java.util.Properties
-
 import net.liftweb.json.{DefaultFormats, JValue, Serialization, ShortTypeHints, parse => liftParser}
-
 import scala.io.Source
 import scala.language.implicitConversions
 
