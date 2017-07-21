@@ -4,6 +4,6 @@ import com.sbartnik.domain.{ActionBySite, UniqueVisitorsBySite}
 
 trait BusinessLogic {
 
-  def getSiteActions(siteName: String, windowSize: Int): List[ActionBySite]
-  def getUniqueVisitors(siteName: String, windowIndex: Int): List[UniqueVisitorsBySite]
+  def getSiteActions(siteName: String, bucketsNumber: Int): List[ActionBySite]
+  def getUniqueVisitors(siteName: String, bucketIndex: Int): List[UniqueVisitorsBySite]
 }

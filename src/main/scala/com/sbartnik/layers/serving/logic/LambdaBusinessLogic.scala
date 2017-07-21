@@ -3,8 +3,6 @@ package com.sbartnik.layers.serving.logic
 import com.sbartnik.common.CassandraOperations
 import com.sbartnik.config.AppConfig
 import com.sbartnik.domain.{ActionBySite, UniqueVisitorsBySite}
-import org.apache.spark.streaming.{Milliseconds, Minutes}
-
 import scala.collection.JavaConverters._
 import scala.language.postfixOps
 
@@ -13,13 +11,13 @@ object LambdaBusinessLogic extends BusinessLogic with CassandraOperations {
   private val conf = AppConfig
   private def cs = getInitializedSession
 
-  override def getSiteActions(siteName: String, windowSize: Int): List[ActionBySite] = {
+  override def getSiteActions(siteName: String, bucketsNumber: Int): List[ActionBySite] = {
 
-    def timestampBucketBoundary = Milliseconds(System.currentTimeMillis) - (Minutes(conf.batchBucketMinutes) * windowSize.toInt)
+    def timestampBucketBoundary = System.currentTimeMillis - (conf.batchBucketMinutes * 60 * 1000 * bucketsNumber)
 
     val filterExpressions = List(
       if(!siteName.isEmpty) s"site = '$siteName'" else "",
-      if(windowSize > 0) s"timestamp_bucket > ${timestampBucketBoundary.milliseconds}" else ""
+      if(bucketsNumber > 0) s"timestamp_bucket > $timestampBucketBoundary" else ""
     ).filter(!_.isEmpty)
 
     val filterExpression = if(filterExpressions.nonEmpty)
@@ -44,8 +42,8 @@ object LambdaBusinessLogic extends BusinessLogic with CassandraOperations {
     resultMapped
   }
 
-  override def getUniqueVisitors(siteName: String, windowIndex: Int): List[UniqueVisitorsBySite] = {
+  override def getUniqueVisitors(siteName: String, bucketIndex: Int): List[UniqueVisitorsBySite] = {
     val cs = getInitializedSession
-    List(UniqueVisitorsBySite(s"lambda $siteName", windowIndex, 123))
+    List(UniqueVisitorsBySite(s"lambda $siteName", bucketIndex, 123))
   }
 }

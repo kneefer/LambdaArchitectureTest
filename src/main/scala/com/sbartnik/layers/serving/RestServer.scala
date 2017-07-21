@@ -2,11 +2,9 @@ package com.sbartnik.layers.serving
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server._
 import akka.stream.ActorMaterializer
-import com.kneefer.util.HttpUtil
+import com.sbartnik.common.HttpUtil
 import com.sbartnik.common.Helpers
-import com.sbartnik.domain.ActionBySite
 import com.sbartnik.layers.serving.logic.{BusinessLogic, LambdaBusinessLogic, RdbmsBusinessLogic}
 
 import scala.concurrent.Future
@@ -34,8 +32,8 @@ object RestServer extends App with HttpUtil with Helpers {
       // windowSize - if passed, result will include aggregated actions for period of time equals N*windowLength
       //            - if not passed, result will include aggregated actions for full available history
       path("siteActions") {
-        parameters('siteName ? "", 'windowSize ? -1) { (siteName, windowSize) =>
-          execute(api, _.getSiteActions(siteName, windowSize))
+        parameters('siteName ? "", 'bucketsNumber ? -1) { (siteName, bucketsNumber) =>
+          execute(api, _.getSiteActions(siteName, bucketsNumber))
         }
       }
 

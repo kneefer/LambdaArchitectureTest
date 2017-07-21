@@ -4,7 +4,6 @@ import com.sbartnik.config.{AppConfig, ConfigurationProvider}
 import com.sbartnik.common.{Helpers, KafkaProducerOperations}
 import com.sbartnik.domain.SiteActionRecord
 import com.typesafe.scalalogging.LazyLogging
-import org.slf4j.LoggerFactory
 
 import scala.util.Random
 
