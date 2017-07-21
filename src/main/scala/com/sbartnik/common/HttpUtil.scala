@@ -1,4 +1,4 @@
-package com.kneefer.util
+package com.sbartnik.common
 
 import akka.http.scaladsl.server._
 import com.typesafe.scalalogging.LazyLogging
@@ -9,7 +9,7 @@ trait HttpUtil extends Directives with Json4sSupport with LazyLogging {
 
   implicit val serialization = native.Serialization
   implicit def json4sFormats: Formats = DefaultFormats
-  val rejectionHandler = RejectionHandler.default
+  private val rejectionHandler = RejectionHandler.default
 
   def logDuration(inner: Route): Route = { ctx =>
     val start = System.currentTimeMillis()

@@ -1,4 +1,4 @@
-import com.sbartnik.layers.batch.{BatchJob}
+import com.sbartnik.layers.batch.BatchJob
 
 object BatchJobRunner {
   def main(args: Array[String]) {

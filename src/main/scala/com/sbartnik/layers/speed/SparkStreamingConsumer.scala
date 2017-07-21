@@ -37,7 +37,7 @@ object SparkStreamingConsumer extends App {
 
   import ss.implicits._
 
-  var sc = ss.sparkContext
+  val sc = ss.sparkContext
   sc.setCheckpointDir(checkpointDirectory)
   val sqlc = ss.sqlContext
 
@@ -84,7 +84,7 @@ object SparkStreamingConsumer extends App {
     })
 
     val uniqueVisitorsBySiteStateSpec  = StateSpec
-      .function((k: (String, Long), v: Option[HLL], state: State[HLL]) => {
+      .function((_: (String, Long), v: Option[HLL], state: State[HLL]) => {
         val currHLL = state.getOption().getOrElse(new HyperLogLogMonoid(conf.hllBitsCount).zero)
         val newHLL = v match {
           case Some(hll) => currHLL + hll
@@ -98,8 +98,8 @@ object SparkStreamingConsumer extends App {
       .mapWithState(uniqueVisitorsBySiteStateSpec)
       .stateSnapshots()
       .reduceByKeyAndWindow(
-        (a, b) => b,
-        (a, b) => a,
+        (_, b) => b,
+        (a, _) => a,
         Seconds(conf.streamingWindowDurationSeconds / conf.streamingBatchDurationSeconds * conf.streamingBatchDurationSeconds)
       )
 
@@ -132,7 +132,7 @@ object SparkStreamingConsumer extends App {
     })
 
     val actionsBySiteStateSpec = StateSpec
-      .function((k: (String, Long), v: Option[ActionBySite], state: State[(Long, Long, Long)]) => {
+      .function((_: (String, Long), v: Option[ActionBySite], state: State[(Long, Long, Long)]) => {
         var (favCount, commCount, viewCount) = state.getOption().getOrElse((0L, 0L, 0L))
         val newVal = v match {
           case Some(x) => (x.fav_count, x.comm_count, x.view_count)
@@ -151,8 +151,8 @@ object SparkStreamingConsumer extends App {
       .mapWithState(actionsBySiteStateSpec)
       .stateSnapshots()
       .reduceByKeyAndWindow(
-        (a, b) => b,
-        (a, b) => a,
+        (_, b) => b,
+        (a, _) => a,
         Seconds(conf.streamingWindowDurationSeconds / conf.streamingBatchDurationSeconds * conf.streamingBatchDurationSeconds)
       )
 
