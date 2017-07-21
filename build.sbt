@@ -4,7 +4,7 @@ name := "LambdaArchitectureTest"
 
 spName := "sbartnik/LambdaArchitectureTest"
 
-scalacOptions += "-feature"
+scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation")
 
 sparkVersion := "2.0.0"
 

@@ -7,7 +7,7 @@ trait CassandraOperations {
 
   private val conf = AppConfig.Cassandra
 
-  val getInitializedSession: Session = {
+  def getInitializedSession: Session = {
     val cluster = new Cluster.Builder()
       .withClusterName("Lambda Architecture Test Cluster")
       .addContactPoint(conf.host)

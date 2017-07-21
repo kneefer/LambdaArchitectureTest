@@ -80,7 +80,7 @@ object SparkStreamingConsumer extends App {
 
     val uniqueVisitorsBySite = siteActionRecordStream.map(record => {
       val hll = new HyperLogLogMonoid(conf.hllBitsCount)
-      ((record.site, record.timestampBucket), hll(record.visitor.getBytes))
+      ((record.site, record.timestampBucket), hll.toHLL(record.visitor.getBytes))
     })
 
     val uniqueVisitorsBySiteStateSpec  = StateSpec

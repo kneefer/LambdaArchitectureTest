@@ -1,6 +1,7 @@
 package com.sbartnik.domain
 
 import com.datastax.driver.core.Row
+import com.sbartnik.common.CassandraRowMapper
 
 case class ActionBySite(site: String,
                         timestamp_bucket: Long,
@@ -8,8 +9,8 @@ case class ActionBySite(site: String,
                         comm_count: Long,
                         view_count: Long)
 
-object ActionBySite {
-  def map(x: Row): ActionBySite = {
+object ActionBySite extends CassandraRowMapper[ActionBySite] {
+  def mapRow(x: Row): ActionBySite = {
     ActionBySite(
       x.getString(0),
       x.getLong(1),
