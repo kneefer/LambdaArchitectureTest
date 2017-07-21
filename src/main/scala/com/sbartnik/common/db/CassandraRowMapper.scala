@@ -1,7 +1,8 @@
-package com.sbartnik.common
+package com.sbartnik.common.db
+
+import com.datastax.driver.core.{ResultSet, Row}
 
 import scala.collection.JavaConverters._
-import com.datastax.driver.core.{ResultSet, Row}
 
 trait CassandraRowMapper[T] {
   def mapRow(row: Row): T

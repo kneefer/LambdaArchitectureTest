@@ -34,7 +34,8 @@ lazy val deps = Seq(
   akkaHttpJson,
   jansi,
   json4s,
-  twitterAlgebird
+  twitterAlgebird,
+  postgres
 )
 
 lazy val root = (project in file("."))

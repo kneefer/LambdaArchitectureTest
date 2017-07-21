@@ -1,4 +1,4 @@
-package com.sbartnik.common
+package com.sbartnik.common.db
 
 import com.datastax.driver.core.{Cluster, ConsistencyLevel, QueryOptions, Session}
 import com.sbartnik.config.AppConfig
@@ -7,7 +7,7 @@ trait CassandraOperations {
 
   private val conf = AppConfig.Cassandra
 
-  def getInitializedSession: Session = {
+  def withSession(func: Session => Unit): Unit = {
     val cluster = new Cluster.Builder()
       .withClusterName("Lambda Architecture Test Cluster")
       .addContactPoint(conf.host)
@@ -15,6 +15,16 @@ trait CassandraOperations {
       .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE)).build
 
     val session = cluster.connect
+    try{
+      session.execute(s"USE ${conf.keyspaceName}")
+      func(session)
+    } finally {
+      session.close()
+    }
+  }
+
+  def initDb(): Unit = withSession(session => {
+
     session.execute(s"CREATE KEYSPACE IF NOT EXISTS ${conf.keyspaceName} WITH REPLICATION = " +
       s"{ 'class' : 'SimpleStrategy', 'replication_factor' : 1 }")
 
@@ -51,8 +61,6 @@ trait CassandraOperations {
       s"view_count bigint, " +
       s"PRIMARY KEY (site, timestamp_bucket)" +
       s") WITH CLUSTERING ORDER BY (timestamp_bucket DESC)")
-
-    session
-  }
+  })
 }
 object CassandraOperations extends CassandraOperations

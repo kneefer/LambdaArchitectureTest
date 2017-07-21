@@ -28,6 +28,12 @@ object AppConfig {
     val speedActionsBySiteTable : String = cassandraConfig.getStringList("tables").get(3)
   }
 
+  object Postgres {
+    private val postgresConfig = appConfig.getConfig("postgres")
+
+    val connectionString: String = postgresConfig.getString("connectionString")
+  }
+
   object Kafka {
     private val kafkaConfig = appConfig.getConfig("kafka")
 

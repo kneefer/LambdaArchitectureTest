@@ -1,7 +1,7 @@
 package com.sbartnik.domain
 
 import com.datastax.driver.core.Row
-import com.sbartnik.common.CassandraRowMapper
+import com.sbartnik.common.db.CassandraRowMapper
 
 case class UniqueVisitorsBySite(site: String,
                                 timestamp_bucket: Long,

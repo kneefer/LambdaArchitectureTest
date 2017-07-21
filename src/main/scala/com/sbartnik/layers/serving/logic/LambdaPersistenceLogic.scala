@@ -1,16 +1,16 @@
 package com.sbartnik.layers.serving.logic
 
-import com.sbartnik.common.CassandraOperations
+import com.datastax.driver.core.ResultSet
 import com.sbartnik.config.AppConfig
 import com.sbartnik.domain.{ActionBySite, UniqueVisitorsBySite}
-import com.sbartnik.common.CassandraRowMapper._
+import com.sbartnik.common.db.CassandraRowMapper._
+import com.sbartnik.common.db.CassandraOperations
 
 import scala.language.postfixOps
 
 object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations {
 
   private val conf = AppConfig
-  private val cs = getInitializedSession
 
   private def timestampBucketBoundary(index: Int) = {
     System.currentTimeMillis - (conf.batchBucketMinutes * 60 * 1000 * index)
@@ -45,8 +45,11 @@ object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations 
          |PER PARTITION LIMIT 1;
       """.stripMargin
 
-    val batchDbResultSet = cs.execute(batchQuery)
-    val speedDbResultSet = cs.execute(speedQuery)
+    var batchDbResultSet, speedDbResultSet: ResultSet = null
+    withSession(cs => {
+      batchDbResultSet = cs.execute(batchQuery)
+      speedDbResultSet = cs.execute(speedQuery)
+    })
 
     val batchResultMapped = batchDbResultSet.map(ActionBySite)
     val speedResultMapped = speedDbResultSet.map(ActionBySite)
@@ -88,9 +91,12 @@ object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations 
          |PER PARTITION LIMIT 1;
       """.stripMargin
 
-    val dbResult = cs.execute(if(bucketIndex > 0) batchQuery else speedQuery)
-    val dbResultMapped = dbResult.map(UniqueVisitorsBySite)
+    var dbResultSet: ResultSet = null
+    withSession(cs => {
+      dbResultSet = cs.execute(if(bucketIndex > 0) batchQuery else speedQuery)
+    })
 
+    val dbResultMapped = dbResultSet.map(UniqueVisitorsBySite)
     dbResultMapped
   }
 }

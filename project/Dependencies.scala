@@ -21,4 +21,5 @@ object Dependencies {
   val json4s =                "org.json4s"                 %% "json4s-native"             % "3.3.0"
   val jansi =                 "org.fusesource.jansi"        % "jansi"                     % "1.12"
   val twitterAlgebird =       "com.twitter"                %% "algebird-core"             % "0.11.0"
+  val postgres =              "org.postgresql"              % "postgresql"                % "42.1.1"
 }
