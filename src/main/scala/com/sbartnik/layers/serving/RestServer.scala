@@ -35,17 +35,16 @@ object RestServer extends App with HttpUtil with Helpers {
         parameters('siteName ? "", 'bucketsNumber ? -1) { (siteName, bucketsNumber) =>
           execute(api, _.getSiteActions(siteName, bucketsNumber))
         }
+      } ~
+      // siteName - if passed, result will contain unique visitors only of provided site
+      //          - if not passed, result will consist of unique visitors of all sites
+      // bucketIndex - if passed, result will include aggregated actions for period of time equals N*bucketIndex
+      //            - if not passed, result will include aggregated actions for full available history
+      path("uniqueVisitors") {
+        parameters('siteName ? "", 'bucketIndex ? -1) { (siteName, bucketIndex) =>
+          execute(api, _.getUniqueVisitors(siteName, bucketIndex))
+        }
       }
-
-//      // siteName - if passed, result will contain unique visitors only of provided site
-//      //          - if not passed, result will consist of unique visitors of all sites
-//      // windowIndex - if passed, result will include aggregated actions for period of time equals N*windowLength
-//      //            - if not passed, result will include aggregated actions for full available history
-//      path("uniqueVisitors") {
-//        parameters('siteName ? "", 'windowIndex ? -1) { (siteName, windowIndex) =>
-//          execute(api, _.getUniqueVisitors(siteName, windowIndex))
-//        }
-//      }
     }
   }
 
