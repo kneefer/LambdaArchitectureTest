@@ -10,7 +10,7 @@ import scala.language.postfixOps
 object LambdaBusinessLogic extends BusinessLogic with CassandraOperations {
 
   private val conf = AppConfig
-  private def cs = getInitializedSession
+  private val cs = getInitializedSession
 
   override def getSiteActions(siteName: String, bucketsNumber: Int): List[ActionBySite] = {
 
@@ -44,13 +44,20 @@ object LambdaBusinessLogic extends BusinessLogic with CassandraOperations {
        """.stripMargin
 
     val batchDbResultSet = cs.execute(batchQuery)
-    val batchResultMapped = batchDbResultSet.map(ActionBySite)
-
     val speedDbResultSet = cs.execute(speedQuery)
+
+    val batchResultMapped = batchDbResultSet.map(ActionBySite)
     val speedResultMapped = speedDbResultSet.map(ActionBySite)
 
+    val mergedResult = (batchResultMapped ++ speedResultMapped).groupBy(_.site).map(x => ActionBySite(
+      x._1,
+      x._2.head.timestamp_bucket,
+      x._2.map(_.comm_count).sum,
+      x._2.map(_.fav_count).sum,
+      x._2.map(_.view_count).sum)
+    )
 
-    batchResultMapped
+    mergedResult.toList
   }
 
   override def getUniqueVisitors(siteName: String, bucketIndex: Int): List[UniqueVisitorsBySite] = {
