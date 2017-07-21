@@ -2,6 +2,7 @@ package com.sbartnik.layers.batch
 
 import com.sbartnik.config.AppConfig
 import org.apache.spark.sql.{SaveMode, SparkSession}
+import org.apache.spark.streaming.Minutes
 
 class BatchJob extends App {
 
@@ -21,7 +22,7 @@ class BatchJob extends App {
   val sqlc = ss.sqlContext
 
   val dfToProcess = sqlc.read.parquet(conf.hdfsDataPath)
-    .where("unix_timestamp() - timestampBucket / 1000 <= 60 * 60 * 1")
+    .where(s"unix_timestamp() - timestampBucket / 1000 <= ${conf.batchBucketMinutes * 60}")
 
   dfToProcess.createOrReplaceTempView("records")
 

@@ -22,14 +22,14 @@ trait CassandraOperations {
 
     session.execute(s"CREATE TABLE IF NOT EXISTS ${conf.batchUniqueVisitorsBySiteTable} (" +
       s"timestamp_bucket bigint, " +
-      s"site text, " +
+      s"site ascii, " +
       s"unique_visitors bigint, " +
       s"PRIMARY KEY (site, timestamp_bucket)" +
       s") WITH CLUSTERING ORDER BY (timestamp_bucket DESC)")
 
     session.execute(s"CREATE TABLE IF NOT EXISTS ${conf.batchActionsBySiteTable} (" +
       s"timestamp_bucket bigint, " +
-      s"site text," +
+      s"site ascii," +
       s"fav_count bigint, " +
       s"comm_count bigint, " +
       s"view_count bigint, " +
@@ -38,14 +38,14 @@ trait CassandraOperations {
 
     session.execute(s"CREATE TABLE IF NOT EXISTS ${conf.speedUniqueVisitorsBySiteTable} (" +
       s"timestamp_bucket bigint, " +
-      s"site text, " +
+      s"site ascii, " +
       s"unique_visitors bigint, " +
       s"PRIMARY KEY (site, timestamp_bucket)" +
       s") WITH CLUSTERING ORDER BY (timestamp_bucket DESC)")
 
     session.execute(s"CREATE TABLE IF NOT EXISTS ${conf.speedActionsBySiteTable} (" +
       s"timestamp_bucket bigint, " +
-      s"site text," +
+      s"site ascii," +
       s"fav_count bigint, " +
       s"comm_count bigint, " +
       s"view_count bigint, " +

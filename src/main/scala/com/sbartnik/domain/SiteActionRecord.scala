@@ -1,7 +1,8 @@
 package com.sbartnik.domain
 
-import com.sbartnik.common.Helpers
+import com.sbartnik.config.AppConfig
 import org.apache.spark.rdd.RDD
+import org.apache.spark.streaming.Minutes
 import org.apache.spark.streaming.kafka.HasOffsetRanges
 
 case class SiteActionRecord(timestamp: Long,
@@ -17,11 +18,14 @@ case class SiteActionRecord(timestamp: Long,
                             var props: Map[String, String] = Map()) {
 
   def serialized: String = {
-    s"$timestamp\t$referrer\t$action\t$previousPage\t$visitor\t$geo\t$timeSpentSeconds\t$subPage\t$site\n"
+    s"$timestamp\t$referrer\t$action\t$previousPage\t$visitor\t$geo\t$timeSpentSeconds\t$subPage\t$site"
   }
 }
 
 object SiteActionRecord {
+
+  private val conf = AppConfig
+  private val bucketMsSize = Minutes(conf.batchBucketMinutes).milliseconds
 
   def deserialize(line: String): Option[SiteActionRecord] = {
     val record = line.split("\\t")
@@ -36,21 +40,18 @@ object SiteActionRecord {
   def fromStringRDDToRDD: (RDD[(String, String)]) => RDD[SiteActionRecord] = (input: RDD[(String, String)]) => {
     val offsetRanges = input.asInstanceOf[HasOffsetRanges].offsetRanges
 
-    val BUCKET_MS_SIZE = 1000 * 60 * 60
-
     input.mapPartitionsWithIndex((index, iter) => {
       val or = offsetRanges(index)
       iter.flatMap(kv => {
         val siteActionRecord = SiteActionRecord.deserialize(kv._2) match {
-          case Some(x) => {
-            x.timestampBucket = x.timestamp / BUCKET_MS_SIZE * BUCKET_MS_SIZE
+          case Some(x) =>
+            x.timestampBucket = x.timestamp / bucketMsSize * bucketMsSize
             x.props = Map(
               "topic" -> or.topic,
               "kafkaPartition" -> or.partition.toString,
               "fromOffset" -> or.fromOffset.toString,
               "untilOffset" -> or.untilOffset.toString)
             Some(x)
-          }
           case None => None
         }
         siteActionRecord

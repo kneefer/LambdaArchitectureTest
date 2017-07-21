@@ -1,7 +1,7 @@
-import com.sbartnik.layers.serving.LambdaRestServer
+import com.sbartnik.layers.serving.RestServer
 
 object RestServerRunner {
   def main(args: Array[String]) {
-    LambdaRestServer.main(args)
+    RestServer.main(args)
   }
 }
