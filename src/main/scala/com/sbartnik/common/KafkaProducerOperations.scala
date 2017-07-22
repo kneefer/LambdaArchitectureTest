@@ -18,8 +18,8 @@ class KafkaProducerOperations(configProps: Properties, topic: String, numOfParti
   def send(message: String): Boolean = {
     try {
       logger.info(s"Sending message to topic $topic...")
-      val partition = rnd.nextInt(numOfPartitions).toString
-      val recordToSend = new ProducerRecord[String, String](topic, partition, message)
+      val partition = rnd.nextInt(numOfPartitions)
+      val recordToSend = new ProducerRecord[String, String](topic, partition, 0.toString, message)
       kafkaProducer.send(recordToSend)
       true
     } catch {

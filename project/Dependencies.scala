@@ -10,7 +10,7 @@ object Dependencies {
   val sparkStreamingKafka =   "org.apache.spark"           %% "spark-streaming-kafka-0-8" % sparkVer
   val sparkHive =             "org.apache.spark"           %% "spark-hive"                % sparkVer
   val sparkSql =              "org.apache.spark"           %% "spark-sql"                 % sparkVer
-  val kafka =                 "org.apache.kafka"           %% "kafka"                     % "0.8.2.1"
+  val kafka =                 "org.apache.kafka"           %% "kafka"                     % "0.9.0.1"
   val akkaHttp =              "com.typesafe.akka"          %% "akka-http-experimental"    % "2.4.11"
   val lift =                  "net.liftweb"                %% "lift-json"                 % "2.6.2"
   val sparkCassandraConnect = "com.datastax.spark"         %% "spark-cassandra-connector" % "2.0.0-M3"

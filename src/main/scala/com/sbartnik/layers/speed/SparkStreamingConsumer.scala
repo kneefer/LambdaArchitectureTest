@@ -8,6 +8,7 @@ import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.KafkaUtils
 import com.datastax.spark.connector.streaming._
 import com.twitter.algebird.{HLL, HyperLogLogMonoid}
+import org.apache.kafka.clients.consumer.ConsumerConfig
 
 object SparkStreamingConsumer extends App {
 
@@ -15,9 +16,9 @@ object SparkStreamingConsumer extends App {
   val kafkaConf = conf.Kafka
 
   val kafkaDirectParams = Map(
-    "metadata.broker.list" -> kafkaConf.Producer.bootstrapServers,
-    "group.id" -> kafkaConf.StreamConsumer.groupId,
-    "auto.offset.reset" -> kafkaConf.StreamConsumer.autoOffsetReset
+    ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG -> kafkaConf.StreamConsumer.bootstrapServers,
+    ConsumerConfig.GROUP_ID_CONFIG -> kafkaConf.StreamConsumer.groupId,
+    ConsumerConfig.AUTO_OFFSET_RESET_CONFIG -> kafkaConf.StreamConsumer.autoOffsetReset
   )
 
   val checkpointDirectory = conf.checkpointDir

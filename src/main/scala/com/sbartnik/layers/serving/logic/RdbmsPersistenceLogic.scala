@@ -12,7 +12,7 @@ object RdbmsPersistenceLogic extends PersistenceLogic with PostgresOperations wi
   private val conf = AppConfig
 
   private def timestampBucketBoundary(index: Int) = {
-    System.currentTimeMillis - (conf.batchBucketMinutes * 60 * 1000 * index)
+    System.currentTimeMillis - (conf.batchBucketMinutes * 60L * 1000 * index)
   }
 
   override def getSiteActions(siteName: String, bucketsNumber: Int): List[ActionBySite] = {

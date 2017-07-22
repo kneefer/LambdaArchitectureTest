@@ -65,11 +65,8 @@ object AppConfig {
 
       val groupId: String = streamConsumerConf.getString("groupId")
       val clientId: String = streamConsumerConf.getString("clientId")
-      val zookeeperConnect: String = streamConsumerConf.getString("zookeeperConnect")
-      val enableAutoCommit: String = streamConsumerConf.getString("enableAutoCommit")
+      val bootstrapServers: String = streamConsumerConf.getString("bootstrapServers")
       val autoOffsetReset: String = streamConsumerConf.getString("autoOffsetReset")
-      val consumerTimeoutMs: Int = streamConsumerConf.getInt("consumerTimeoutMs")
-      val autoCommitIntervalMs: Int = streamConsumerConf.getInt("autoCommitIntervalMs")
       val keyDeserializerClass: String = streamConsumerConf.getString("keyDeserializerClass")
       val valueDeserializerClass: String = streamConsumerConf.getString("valueDeserializerClass")
     }
