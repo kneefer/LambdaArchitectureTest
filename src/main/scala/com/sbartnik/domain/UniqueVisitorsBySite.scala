@@ -17,7 +17,8 @@ object UniqueVisitorsBySite extends DbRowMapper[UniqueVisitorsBySite] {
 
   override def mapSingleRecord(rs: ResultSet): UniqueVisitorsBySite = {
     UniqueVisitorsBySite(
-      rs.getString(0), rs.getLong(1), rs.getLong(2)
+      // In JDBC ndexes are numbered from 1... why!?
+      rs.getString(1), rs.getLong(2), rs.getLong(3)
     )
   }
 }

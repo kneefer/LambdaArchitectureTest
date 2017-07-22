@@ -114,11 +114,11 @@ object SparkStreamingConsumer extends App {
 
     val actionBySite = siteActionRecordStream.transform(rdd => {
       rdd.toDF().createOrReplaceTempView("records")
-      val actionsBySite = sqlc.sql(
-        """SELECT site, timestampBucket as timestamp_bucket,
-            |SUM(CASE WHEN action = 'add_to_favorites' THEN 1 ELSE 0 END) as fav_count,
-            |SUM(CASE WHEN action = 'comment' THEN 1 ELSE 0 END) as comm_count,
-            |SUM(CASE WHEN action = 'page_view' THEN 1 ELSE 0 END) as view_count
+      val actionsBySite = sqlc.sql("""
+          |SELECT site, timestampBucket as timestamp_bucket,
+          |  SUM(CASE WHEN action = 'add_to_favorites' THEN 1 ELSE 0 END) as fav_count,
+          |  SUM(CASE WHEN action = 'comment' THEN 1 ELSE 0 END) as comm_count,
+          |  SUM(CASE WHEN action = 'page_view' THEN 1 ELSE 0 END) as view_count
           |FROM records
           |GROUP BY site, timestampBucket
           |ORDER BY site

@@ -23,24 +23,24 @@ trait PostgresOperations {
 
     stmt.addBatch(
       s"""CREATE TABLE IF NOT EXISTS ${conf.siteTable} (
-           |id int primary key  NOT NULL,
-           |name           text NOT NULL UNIQUE
+           |id serial primary key  NOT NULL,
+           |name              text NOT NULL UNIQUE
          |);
        """.stripMargin
     )
 
     stmt.addBatch(
       s"""CREATE TABLE IF NOT EXISTS ${conf.actionTypeTable} (
-           |id int primary key  NOT NULL,
-           |name           text NOT NULL UNIQUE
+           |id serial primary key  NOT NULL,
+           |name              text NOT NULL UNIQUE
          |);
        """.stripMargin
     )
 
     stmt.addBatch(
       s"""CREATE TABLE IF NOT EXISTS ${conf.visitorTable} (
-           |id bigint primary key  NOT NULL,
-           |name              text NOT NULL UNIQUE
+           |id bigserial primary key  NOT NULL,
+           |name                 text NOT NULL UNIQUE
          |);
        """.stripMargin
     )

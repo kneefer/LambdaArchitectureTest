@@ -5,9 +5,10 @@ import com.sbartnik.config.AppConfig
 import com.sbartnik.domain.{ActionBySite, UniqueVisitorsBySite}
 import com.sbartnik.common.db.DbRowMapper._
 import com.sbartnik.common.db.CassandraOperations
+import com.typesafe.scalalogging.LazyLogging
 import scala.language.postfixOps
 
-object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations {
+object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations with LazyLogging {
 
   private val conf = AppConfig
 
@@ -25,20 +26,20 @@ object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations 
     val batchFilterExpression = batchFilters.mkString(if(batchFilters.isEmpty) "" else "WHERE ", " AND ", "")
     val speedFilterExpression = if(!siteName.isEmpty) s"WHERE site = '$siteName'" else ""
 
-    val batchDbQuery =
-      s"""SELECT site,
-           |MIN(timestamp_bucket) AS timestamp_bucket,
-           |SUM(comm_count) AS comm_count,
-           |SUM(fav_count) AS fav_count,
-           |SUM(view_count) AS view_count
+    val batchDbQuery = s"""
+         |SELECT site,
+         |  MIN(timestamp_bucket) AS timestamp_bucket,
+         |  SUM(comm_count) AS comm_count,
+         |  SUM(fav_count) AS fav_count,
+         |  SUM(view_count) AS view_count
          |FROM ${conf.Cassandra.batchActionsBySiteTable}
          |$batchFilterExpression
          |GROUP BY site
          |ALLOW FILTERING;
       """.stripMargin
 
-    val speedDbQuery =
-      s"""SELECT *
+    val speedDbQuery = s"""
+         |SELECT *
          |FROM ${conf.Cassandra.speedActionsBySiteTable}
          |$speedFilterExpression
          |PER PARTITION LIMIT 1;
@@ -46,7 +47,9 @@ object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations 
 
     var batchDbResultSet, speedDbResultSet: ResultSet = null
     withSession(cs => {
+      logger.info(batchDbQuery)
       batchDbResultSet = cs.execute(batchDbQuery)
+      logger.info(speedDbQuery)
       speedDbResultSet = cs.execute(speedDbQuery)
     })
 
@@ -75,16 +78,16 @@ object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations 
     val batchFilterExpression = batchFilters.mkString(if(batchFilters.isEmpty) "" else "WHERE ", " AND ", "")
     val speedFilterExpression = if(!siteName.isEmpty) s"WHERE site = '$siteName'" else ""
 
-    val batchDbQuery =
-      s"""SELECT *
+    val batchDbQuery = s"""
+         |SELECT *
          |FROM ${conf.Cassandra.batchUniqueVisitorsBySiteTable}
          |$batchFilterExpression
          |PER PARTITION LIMIT 1
          |ALLOW FILTERING;
       """.stripMargin
 
-    val speedDbQuery =
-      s"""SELECT *
+    val speedDbQuery = s"""
+         |SELECT *
          |FROM ${conf.Cassandra.speedUniqueVisitorsBySiteTable}
          |$speedFilterExpression
          |PER PARTITION LIMIT 1;
@@ -92,7 +95,9 @@ object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations 
 
     var dbResultSet: ResultSet = null
     withSession(cs => {
-      dbResultSet = cs.execute(if(bucketIndex > 0) batchDbQuery else speedDbQuery)
+      val dbQuery = if(bucketIndex > 0) batchDbQuery else speedDbQuery
+      logger.info(dbQuery)
+      dbResultSet = cs.execute(dbQuery)
     })
 
     val dbResultMapped = dbResultSet.map(UniqueVisitorsBySite)

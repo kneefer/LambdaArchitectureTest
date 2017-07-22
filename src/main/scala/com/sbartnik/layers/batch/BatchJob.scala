@@ -30,9 +30,9 @@ class BatchJob extends App {
   // Compute unique visitors
   //////////////////////////
 
-  val uniqueVisitorsBySite = sqlc.sql(
-    """SELECT site, timestampBucket as timestamp_bucket,
-        |COUNT(DISTINCT visitor) as unique_visitors
+  val uniqueVisitorsBySite = sqlc.sql("""
+      |SELECT site, timestampBucket AS timestamp_bucket,
+      |  COUNT(DISTINCT visitor) AS unique_visitors
       |FROM records
       |GROUP BY site, timestampBucket
     """.stripMargin)
@@ -50,11 +50,11 @@ class BatchJob extends App {
   // Compute action by site
   //////////////////////////
 
-  val actionsBySite = sqlc.sql(
-    """SELECT site, timestampBucket as timestamp_bucket,
-        |SUM(CASE WHEN action = 'add_to_favorites' THEN 1 ELSE 0 END) as fav_count,
-        |SUM(CASE WHEN action = 'comment' THEN 1 ELSE 0 END) as comm_count,
-        |SUM(CASE WHEN action = 'page_view' THEN 1 ELSE 0 END) as view_count
+  val actionsBySite = sqlc.sql("""
+      |SELECT site, timestampBucket AS timestamp_bucket,
+      |  SUM(CASE WHEN action = 'add_to_favorites' THEN 1 ELSE 0 END) AS fav_count,
+      |  SUM(CASE WHEN action = 'comment' THEN 1 ELSE 0 END) AS comm_count,
+      |  SUM(CASE WHEN action = 'page_view' THEN 1 ELSE 0 END) AS view_count
       |FROM records
       |GROUP BY site, timestampBucket
     """.stripMargin

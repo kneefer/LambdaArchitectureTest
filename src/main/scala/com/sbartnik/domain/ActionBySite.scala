@@ -19,9 +19,10 @@ object ActionBySite extends DbRowMapper[ActionBySite] {
   }
 
   override def mapSingleRecord(rs: ResultSet): ActionBySite = {
+    // In JDBC ndexes are numbered from 1... why!?
     ActionBySite(
-      rs.getString(0), rs.getLong(1),
-      rs.getLong(2), rs.getLong(3), rs.getLong(4)
+      rs.getString(1), rs.getLong(2),
+      rs.getLong(3), rs.getLong(4), rs.getLong(5)
     )
   }
 }
