@@ -16,7 +16,8 @@ object RdbmsPersistenceLogic extends PersistenceLogic with PostgresOperations {
 
     var dbResultSet: ResultSet = null
     withConnection(conn => {
-      dbResultSet = conn.createStatement.executeQuery(dbQuery)
+      val ps = conn.prepareStatement(dbQuery)
+      dbResultSet = ps.executeQuery()
     })
 
     val dbResultMapped = dbResultSet.map(ActionBySite)
@@ -32,7 +33,8 @@ object RdbmsPersistenceLogic extends PersistenceLogic with PostgresOperations {
 
     var dbResultSet: ResultSet = null
     withConnection(conn => {
-      dbResultSet = conn.createStatement.executeQuery(dbQuery)
+      val ps = conn.prepareStatement(dbQuery)
+      dbResultSet = ps.executeQuery()
     })
 
     val dbResultMapped = dbResultSet.map(UniqueVisitorsBySite)

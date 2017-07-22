@@ -6,6 +6,6 @@ import com.typesafe.scalalogging.LazyLogging
 object InitPostgres extends LazyLogging {
   def main(args: Array[String]) {
     PostgresOperations.initDb()
-    logger.info("Initialized Cassandra DB keyspace & tables")
+    logger.info("Initialized Postgres DB tables")
   }
 }

@@ -5,16 +5,16 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Minutes
 import org.apache.spark.streaming.kafka.HasOffsetRanges
 
-case class SiteActionRecord(timestamp: Long,
-                            var timestampBucket: Long,
-                            referrer: String,
-                            action: String,
-                            previousPage: String,
-                            visitor: String,
-                            geo: String,
-                            timeSpentSeconds: Int,
-                            subPage: String,
-                            site: String,
+case class SiteActionRecord(timestamp: Long,// INCLUDE + ID FIELD
+                            var timestampBucket: Long,// REMOVE FIELD
+                            referrer: String,// INCLUDE
+                            action: String,// CREATE TABLE
+                            previousPage: String,// INCLUDE
+                            visitor: String,// CREATE TABLE
+                            geo: String,// INCLUDE
+                            timeSpentSeconds: Int,// INCLUDE
+                            subPage: String,// INCLUDE
+                            site: String,// CREATE TABLE
                             var props: Map[String, String] = Map()) {
 
   def serialized: String = {

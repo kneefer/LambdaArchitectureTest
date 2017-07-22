@@ -22,6 +22,7 @@ object AppConfig {
     val keepAliveMs: Int = cassandraConfig.getInt("keepAliveMs")
     val userName: String = cassandraConfig.getString("userName")
     val keyspaceName: String = cassandraConfig.getString("keyspaceName")
+
     val batchUniqueVisitorsBySiteTable : String = cassandraConfig.getStringList("tables").get(0)
     val batchActionsBySiteTable : String = cassandraConfig.getStringList("tables").get(1)
     val speedUniqueVisitorsBySiteTable : String = cassandraConfig.getStringList("tables").get(2)
@@ -32,6 +33,11 @@ object AppConfig {
     private val postgresConfig = appConfig.getConfig("postgres")
 
     val connectionString: String = postgresConfig.getString("connectionString")
+
+    val siteTable : String = postgresConfig.getStringList("tables").get(0)
+    val actionTypeTable : String = postgresConfig.getStringList("tables").get(1)
+    val visitorTable : String = postgresConfig.getStringList("tables").get(2)
+    val actionTable : String = postgresConfig.getStringList("tables").get(3)
   }
 
   object Kafka {

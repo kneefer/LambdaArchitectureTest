@@ -15,7 +15,7 @@ trait CassandraOperations {
       .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE)).build
 
     val session = cluster.connect
-    try{
+    try {
       session.execute(s"USE ${conf.keyspaceName}")
       func(session)
     } finally {

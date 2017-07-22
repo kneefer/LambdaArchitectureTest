@@ -1,6 +1,6 @@
 package com.sbartnik.common.db
 
-import java.sql.{Connection, Driver, DriverManager}
+import java.sql.{Connection, DriverManager}
 import com.sbartnik.config.AppConfig
 
 trait PostgresOperations {
@@ -10,7 +10,7 @@ trait PostgresOperations {
   def withConnection(func: Connection => Unit): Unit = {
 
     val connection = DriverManager.getConnection(conf.connectionString)
-    try{
+    try {
       func(connection)
     } finally {
       connection.close()
@@ -19,6 +19,49 @@ trait PostgresOperations {
 
   def initDb(): Unit = withConnection(connection => {
 
+    val stmt = connection.createStatement
+
+    stmt.addBatch(
+      s"""CREATE TABLE IF NOT EXISTS ${conf.siteTable} (
+           |id int primary key  NOT NULL,
+           |name           text NOT NULL UNIQUE
+         |);
+       """.stripMargin
+    )
+
+    stmt.addBatch(
+      s"""CREATE TABLE IF NOT EXISTS ${conf.actionTypeTable} (
+           |id int primary key  NOT NULL,
+           |name           text NOT NULL UNIQUE
+         |);
+       """.stripMargin
+    )
+
+    stmt.addBatch(
+      s"""CREATE TABLE IF NOT EXISTS ${conf.visitorTable} (
+           |id bigint primary key  NOT NULL,
+           |name              text NOT NULL UNIQUE
+         |);
+       """.stripMargin
+    )
+
+    stmt.addBatch(
+      s"""CREATE TABLE IF NOT EXISTS ${conf.actionTable} (
+            |id bigint primary  key    NOT NULL,
+            |timestamp          bigint NOT NULL,
+            |site_id            int    REFERENCES ${conf.siteTable}(id),
+            |action_id          int    REFERENCES ${conf.actionTypeTable}(id),
+            |visitor_id         bigint REFERENCES ${conf.visitorTable}(id),
+            |referrer           text   NULL,
+            |previous_page      text   NULL,
+            |geo                text   NULL,
+            |time_spent_seconds int    NOT NULL,
+            |sub_page           text   NULL
+          |);
+       """.stripMargin
+    )
+
+    stmt.executeBatch()
   })
 }
 object PostgresOperations extends PostgresOperations

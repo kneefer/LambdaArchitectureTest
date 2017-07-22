@@ -13,21 +13,15 @@ case class ActionBySite(site: String,
 object ActionBySite extends DbRowMapper[ActionBySite] {
   def mapSingleRecord(row: Row): ActionBySite = {
     ActionBySite(
-      row.getString(0),
-      row.getLong(1),
-      row.getLong(2),
-      row.getLong(3),
-      row.getLong(4)
+      row.getString(0), row.getLong(1),
+      row.getLong(2), row.getLong(3), row.getLong(4)
     )
   }
 
   override def mapSingleRecord(rs: ResultSet): ActionBySite = {
     ActionBySite(
-      rs.getString(0),
-      rs.getLong(1),
-      rs.getLong(2),
-      rs.getLong(3),
-      rs.getLong(4)
+      rs.getString(0), rs.getLong(1),
+      rs.getLong(2), rs.getLong(3), rs.getLong(4)
     )
   }
 }

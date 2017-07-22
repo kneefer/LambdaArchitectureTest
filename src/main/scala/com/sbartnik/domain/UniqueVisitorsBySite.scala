@@ -11,17 +11,13 @@ case class UniqueVisitorsBySite(site: String,
 object UniqueVisitorsBySite extends DbRowMapper[UniqueVisitorsBySite] {
   override def mapSingleRecord(row: Row): UniqueVisitorsBySite = {
     UniqueVisitorsBySite(
-      row.getString(0),
-      row.getLong(1),
-      row.getLong(2)
+      row.getString(0), row.getLong(1), row.getLong(2)
     )
   }
 
   override def mapSingleRecord(rs: ResultSet): UniqueVisitorsBySite = {
     UniqueVisitorsBySite(
-      rs.getString(0),
-      rs.getLong(1),
-      rs.getLong(2)
+      rs.getString(0), rs.getLong(1), rs.getLong(2)
     )
   }
 }
