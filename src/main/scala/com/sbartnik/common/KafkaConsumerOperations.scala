@@ -13,13 +13,16 @@ class KafkaConsumerOperations(configProps: Properties, topic: String) extends La
   private val kafkaConsumer = new KafkaConsumer[String, String](configProps)
   logger.info(s"Initialized KafkaConsumerOperations with topic '$topic' and properties: ${configProps.format}")
 
-  kafkaConsumer.subscribe(singletonList(topic))
+  kafkaConsumer.subscribe(topic)
 
   def receive(): List[String] = {
     try {
       logger.info(s"Getting messages from topic $topic...")
       val kafkaRecords = kafkaConsumer.poll(1000)
-      val records = kafkaRecords.asScala.map(_.value())
+      val records = kafkaRecords.asScala
+        .values
+        .flatMap(_.records().asScala)
+        .map(_.value())
       records.toList
     } catch {
       case ex: Exception =>

@@ -23,7 +23,6 @@ lazy val commonSettings = Seq(
 )
 
 lazy val deps = Seq(
-  kafka,
   akkaHttp,
   lift,
   sparkHive,
