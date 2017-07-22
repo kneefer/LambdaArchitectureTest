@@ -1,7 +1,8 @@
 package com.sbartnik.domain
 
+import java.sql.ResultSet
 import com.datastax.driver.core.Row
-import com.sbartnik.common.db.CassandraRowMapper
+import com.sbartnik.common.db.DbRowMapper
 
 case class ActionBySite(site: String,
                         timestamp_bucket: Long,
@@ -9,13 +10,24 @@ case class ActionBySite(site: String,
                         comm_count: Long,
                         view_count: Long)
 
-object ActionBySite extends CassandraRowMapper[ActionBySite] {
-  def mapRow(x: Row): ActionBySite = {
+object ActionBySite extends DbRowMapper[ActionBySite] {
+  def mapSingleRecord(row: Row): ActionBySite = {
     ActionBySite(
-      x.getString(0),
-      x.getLong(1),
-      x.getLong(2),
-      x.getLong(3),
-      x.getLong(4))
+      row.getString(0),
+      row.getLong(1),
+      row.getLong(2),
+      row.getLong(3),
+      row.getLong(4)
+    )
+  }
+
+  override def mapSingleRecord(rs: ResultSet): ActionBySite = {
+    ActionBySite(
+      rs.getString(0),
+      rs.getLong(1),
+      rs.getLong(2),
+      rs.getLong(3),
+      rs.getLong(4)
+    )
   }
 }
