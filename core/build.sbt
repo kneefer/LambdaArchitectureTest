@@ -1,8 +1,8 @@
 import Dependencies._
 
-name := "LambdaArchitectureTest"
+name := "LambdaArchitectureTest-Core"
 
-spName := "sbartnik/LambdaArchitectureTest"
+spName := "sbartnik/LambdaArchitectureTest-Core"
 
 scalacOptions ++= Seq("-feature", "-unchecked", "-deprecation")
 
@@ -37,10 +37,10 @@ lazy val deps = Seq(
   postgres
 )
 
-lazy val root = (project in file("."))
+lazy val core = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
-    name := "LambdaArchitectureTest",
+    name := "LambdaArchitectureTest-Core",
     libraryDependencies ++= deps,
     libraryDependencies ~= { _.map(_.exclude("org.slf4j", "slf4j-log4j12"))}
   )
