@@ -32,7 +32,7 @@ object KafkaDataProducer extends App with LazyLogging with Helpers {
 
   for (_ <- 1 to generatorConfig.numOfBatches) {
 
-    val randomSleepEvery = rnd.nextInt(5000) + 2000
+    val randomSleepEvery = rnd.nextInt(80000) + 20000
     var timestamp = System.currentTimeMillis()
     var adjustedTimestamp = timestamp
 
@@ -46,7 +46,7 @@ object KafkaDataProducer extends App with LazyLogging with Helpers {
 
       if(currRecordIndex % randomSleepEvery == 0) {
         logger.info(s"Sent $currRecordIndex messages")
-        val sleepTime = rnd.nextInt(randomSleepEvery)
+        val sleepTime = rnd.nextInt(2000)
         logger.info(s"Sleeping for $sleepTime ms (random sleep)")
         Thread.sleep(sleepTime)
       }
