@@ -26,7 +26,7 @@ object RdbmsConsumer extends App with PostgresOperations with LazyLogging {
                                cache: mutable.Map[String, Long],
                                missingRowsNames: List[String]): Unit = {
 
-    if(missingRowsNames.length == 0)
+    if(missingRowsNames.isEmpty)
       return
 
     val namesToInsert = missingRowsNames.mkString("'),('")
@@ -57,9 +57,9 @@ object RdbmsConsumer extends App with PostgresOperations with LazyLogging {
   }
 
   private def recordInsertSqlPart(record: SiteActionRecord): String = {
-    val siteId = siteCache.get(record.site).get
-    val actionTypeId = actionTypeCache.get(record.action).get
-    val visitorId = visitorCache.get(record.visitor).get
+    val siteId = siteCache(record.site)
+    val actionTypeId = actionTypeCache(record.action)
+    val visitorId = visitorCache(record.visitor)
 
     s"""${record.timestamp}, $siteId, $actionTypeId, $visitorId, '${record.referrer}',
        |'${record.previousPage}', '${record.geo}', ${record.timeSpentSeconds}, '${record.subPage}'
@@ -67,7 +67,7 @@ object RdbmsConsumer extends App with PostgresOperations with LazyLogging {
   }
 
   while(true) {
-    val records = kafkaConsumerOps.receive
+    val records = kafkaConsumerOps.receive()
     val mappedRecords = records
       .map(SiteActionRecord.deserialize)
       .filter(_.isDefined)
@@ -113,6 +113,6 @@ object RdbmsConsumer extends App with PostgresOperations with LazyLogging {
       conn.commit()
     })
 
-    Thread.sleep(10000)
+    // Thread.sleep(2000)
   }
 }

@@ -47,16 +47,16 @@ trait PostgresOperations {
 
     stmt.addBatch(
       s"""CREATE TABLE IF NOT EXISTS ${conf.actionTable} (
-            |id bigint primary  key    NOT NULL,
-            |timestamp          bigint NOT NULL,
-            |site_id            int    REFERENCES ${conf.siteTable}(id),
-            |action_id          int    REFERENCES ${conf.actionTypeTable}(id),
-            |visitor_id         bigint REFERENCES ${conf.visitorTable}(id),
-            |referrer           text   NULL,
-            |previous_page      text   NULL,
-            |geo                text   NULL,
-            |time_spent_seconds int    NOT NULL,
-            |sub_page           text   NULL
+            |id bigserial primary  key    NOT NULL,
+            |timestamp             bigint NOT NULL,
+            |site_id               int    REFERENCES ${conf.siteTable}(id),
+            |action_type_id        int    REFERENCES ${conf.actionTypeTable}(id),
+            |visitor_id            bigint REFERENCES ${conf.visitorTable}(id),
+            |referrer              text   NULL,
+            |previous_page         text   NULL,
+            |geo                   text   NULL,
+            |time_spent_seconds    int    NOT NULL,
+            |sub_page              text   NULL
           |);
        """.stripMargin
     )
