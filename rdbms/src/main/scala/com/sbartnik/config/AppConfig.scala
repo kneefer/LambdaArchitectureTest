@@ -6,6 +6,17 @@ object AppConfig {
 
   private val appConfig = ConfigFactory.load()
 
+  object Postgres {
+    private val postgresConfig = appConfig.getConfig("postgres")
+
+    val connectionString: String = postgresConfig.getString("connectionString")
+
+    val siteTable : String = postgresConfig.getStringList("tables").get(0)
+    val actionTypeTable : String = postgresConfig.getStringList("tables").get(1)
+    val visitorTable : String = postgresConfig.getStringList("tables").get(2)
+    val actionTable : String = postgresConfig.getStringList("tables").get(3)
+  }
+
   object Kafka {
     private val kafkaConfig = appConfig.getConfig("kafka")
 

@@ -1,7 +1,5 @@
 package com.sbartnik.domain
 
-import com.sbartnik.config.AppConfig
-
 case class SiteActionRecord(timestamp: Long,
                             var timestampBucket: Long,
                             referrer: String,
@@ -20,8 +18,6 @@ case class SiteActionRecord(timestamp: Long,
 }
 
 object SiteActionRecord {
-
-  private val conf = AppConfig
 
   def deserialize(line: String): Option[SiteActionRecord] = {
     val record = line.split("\\t")
