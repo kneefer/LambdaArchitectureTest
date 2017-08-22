@@ -11,6 +11,8 @@ import scala.language.postfixOps
 object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations with LazyLogging {
 
   private val conf = AppConfig
+  private val cs = getclusterSession
+  cs.execute(s"USE ${conf.Cassandra.keyspaceName}")
 
   private def timestampBucketBoundary(index: Int) = {
     System.currentTimeMillis - (conf.batchBucketMinutes * 60 * 1000 * index)
@@ -46,12 +48,11 @@ object LambdaPersistenceLogic extends PersistenceLogic with CassandraOperations 
       """.stripMargin
 
     var batchDbResultSet, speedDbResultSet: ResultSet = null
-    withSession(cs => {
-      logger.info(batchDbQuery)
-      batchDbResultSet = cs.execute(batchDbQuery)
-      logger.info(speedDbQuery)
-      speedDbResultSet = cs.execute(speedDbQuery)
-    })
+
+    logger.info(batchDbQuery)
+    batchDbResultSet = cs.execute(batchDbQuery)
+    logger.info(speedDbQuery)
+    speedDbResultSet = cs.execute(speedDbQuery)
 
     val batchResultMapped = batchDbResultSet.map(ActionBySite)
     val speedResultMapped = speedDbResultSet.map(ActionBySite)

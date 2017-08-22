@@ -46,7 +46,7 @@ object RdbmsConsumer extends App with PostgresOperations with LazyLogging {
          |JOIN $tableName t USING (name)
       """.stripMargin
 
-    logger.info(insertQuery)
+    //logger.info(insertQuery)
     val stmt = connection.prepareStatement(insertQuery)
     val resultSet = stmt.executeQuery()
 
@@ -66,19 +66,21 @@ object RdbmsConsumer extends App with PostgresOperations with LazyLogging {
      """.stripMargin
   }
 
-  while(true) {
-    val records = kafkaConsumerOps.receive()
-    val mappedRecords = records
-      .map(SiteActionRecord.deserialize)
-      .filter(_.isDefined)
-      .map(_.get)
+  var numOfRecords = 0
 
-    val missingSiteCache = mappedRecords.map(_.site).distinct.filter(x => !siteCache.contains(x))
-    val missingActionTypeCache = mappedRecords.map(_.action).distinct.filter(x => !actionTypeCache.contains(x))
-    val missingVisitorCache = mappedRecords.map(_.visitor).distinct.filter(x => !visitorCache.contains(x))
+  withConnection(conn => {
+    conn.setAutoCommit(false)
 
-    withConnection(conn => {
-      conn.setAutoCommit(false)
+    while (true) {
+      val records = kafkaConsumerOps.receive()
+      val mappedRecords = records
+        .map(SiteActionRecord.deserialize)
+        .filter(_.isDefined)
+        .map(_.get)
+
+      val missingSiteCache = mappedRecords.map(_.site).distinct.filter(x => !siteCache.contains(x))
+      val missingActionTypeCache = mappedRecords.map(_.action).distinct.filter(x => !actionTypeCache.contains(x))
+      val missingVisitorCache = mappedRecords.map(_.visitor).distinct.filter(x => !visitorCache.contains(x))
 
       updateTableCache(conn, conf.Postgres.siteTable, siteCache, missingSiteCache)
       updateTableCache(conn, conf.Postgres.actionTypeTable, actionTypeCache, missingActionTypeCache)
@@ -88,8 +90,9 @@ object RdbmsConsumer extends App with PostgresOperations with LazyLogging {
         .map(recordInsertSqlPart)
         .mkString("),(")
 
-      if(recordsToInsert.length > 0) {
-        val insertQuery = s"""
+      if (recordsToInsert.length > 0) {
+        val insertQuery =
+          s"""
              |INSERT INTO ${conf.Postgres.actionTable} (
              |  timestamp,
              |  site_id,
@@ -105,14 +108,16 @@ object RdbmsConsumer extends App with PostgresOperations with LazyLogging {
              |)
         """.stripMargin
 
-        logger.info(insertQuery)
+        //logger.info(insertQuery)
         val mainInsertStmt = conn.prepareStatement(insertQuery)
         mainInsertStmt.executeUpdate()
       }
 
       conn.commit()
-    })
 
-    // Thread.sleep(2000)
-  }
+      val currCount = mappedRecords.length
+      numOfRecords += currCount
+      logger.info(s"$numOfRecords,$currCount")
+    }
+  })
 }

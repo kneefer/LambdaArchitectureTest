@@ -13,11 +13,11 @@ class KafkaProducerOperations(configProps: Properties, topic: String, numOfParti
   logger.info(s"Initialized KafkaProducerOperations with topic '$topic' and properties: ${configProps.format}")
   logger.info(s"Topic $topic has ${kafkaProducer.partitionsFor(topic)} partitions")
 
-  private val rnd = new Random()
+  private val rnd = new Random(4325235)
 
   def send(message: String): Boolean = {
     try {
-      logger.info(s"Sending message to topic $topic...")
+      logger.trace(s"Sending message to topic $topic...")
       val partition = rnd.nextInt(numOfPartitions)
       val recordToSend = new ProducerRecord[String, String](topic, partition, 0.toString, message)
       kafkaProducer.send(recordToSend)

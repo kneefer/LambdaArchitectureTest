@@ -23,16 +23,16 @@ object KafkaDataProducer extends App with LazyLogging with Helpers {
   val visitorsIds = (0 to generatorConfig.numOfVisitors).map(x => s"Visitor-$x")
   val subpagesIds= (0 to generatorConfig.numOfSubpages).map(x => s"Subpage-$x")
 
-  val rnd = new Random()
+  val rnd = new Random(574575345)
 
   val kafkaOps = new KafkaProducerOperations(
     kafkaProducerConfigProps,
     kafkaTopic,
     kafkaNumOfPartitions)
 
-  for (_ <- 1 to generatorConfig.numOfBatches) {
+  for (i <- 1 to generatorConfig.numOfBatches) {
 
-    val randomSleepEvery = rnd.nextInt(80000) + 20000
+    //val randomSleepEvery = rnd.nextInt(80000) + 20000
     var timestamp = System.currentTimeMillis()
     var adjustedTimestamp = timestamp
 
@@ -44,16 +44,16 @@ object KafkaDataProducer extends App with LazyLogging with Helpers {
       val recordAsLine = record.serialized
       kafkaOps.send(recordAsLine)
 
-      if(currRecordIndex % randomSleepEvery == 0) {
-        logger.info(s"Sent $currRecordIndex messages")
-        val sleepTime = rnd.nextInt(2000)
-        logger.info(s"Sleeping for $sleepTime ms (random sleep)")
-        Thread.sleep(sleepTime)
-      }
+//      if(currRecordIndex % randomSleepEvery == 0) {
+//        logger.info(s"Sent $currRecordIndex messages")
+//        val sleepTime = rnd.nextInt(2000)
+//        logger.info(s"Sleeping for $sleepTime ms (random sleep)")
+//        Thread.sleep(sleepTime)
+//      }
     }
 
     val sleepAfterEachBatch = generatorConfig.sleepAfterEachFileMs
-    logger.info(s"Sleeping for $sleepAfterEachBatch ms (after batch)")
+    logger.info(s"Sleeping for $sleepAfterEachBatch ms (after batch $i)")
     Thread.sleep(sleepAfterEachBatch)
   }
 

@@ -34,6 +34,8 @@ object SparkStreamingConsumer extends App {
     .config("spark.casandra.connection.port", conf.Cassandra.port)
     .config("spark.cassandra.auth.username", conf.Cassandra.userName)
     .config("spark.cassandra.connection.keep_alive_ms", conf.Cassandra.keepAliveMs)
+    .config("spark.eventLog.enabled", "true")
+    .config("spark.eventLog.dir", "file:///C:/Users/Szymon/Desktop/tests/sparkhistspeed")
     .getOrCreate()
 
   import ss.implicits._

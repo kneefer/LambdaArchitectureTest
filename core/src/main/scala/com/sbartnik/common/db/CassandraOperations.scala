@@ -7,7 +7,7 @@ trait CassandraOperations {
 
   private val conf = AppConfig.Cassandra
 
-  def withSession(func: Session => Unit): Unit = {
+  def getclusterSession = {
     val cluster = new Cluster.Builder()
       .withClusterName("Lambda Architecture Test Cluster")
       .addContactPoint(conf.host)
@@ -15,6 +15,11 @@ trait CassandraOperations {
       .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE)).build
 
     val session = cluster.connect
+    session
+  }
+
+  def withSession(func: Session => Unit): Unit = {
+    val session = getclusterSession
     try {
       session.execute(s"USE ${conf.keyspaceName}")
       func(session)
@@ -23,7 +28,9 @@ trait CassandraOperations {
     }
   }
 
-  def initDb(): Unit = withSession(session => {
+  def initDb(): Unit = {
+
+    val session = getclusterSession
 
     session.execute(s"CREATE KEYSPACE IF NOT EXISTS ${conf.keyspaceName} WITH REPLICATION = " +
       s"{ 'class' : 'SimpleStrategy', 'replication_factor' : 1 }")
@@ -61,6 +68,6 @@ trait CassandraOperations {
       s"view_count bigint, " +
       s"PRIMARY KEY (site, timestamp_bucket)" +
       s") WITH CLUSTERING ORDER BY (timestamp_bucket DESC)")
-  })
+  }
 }
 object CassandraOperations extends CassandraOperations

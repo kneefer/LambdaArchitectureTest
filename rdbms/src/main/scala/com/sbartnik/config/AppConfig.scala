@@ -32,6 +32,7 @@ object AppConfig {
       val autoOffsetReset: String = streamConsumerConf.getString("autoOffsetReset")
       val keyDeserializerClass: String = streamConsumerConf.getString("keyDeserializerClass")
       val valueDeserializerClass: String = streamConsumerConf.getString("valueDeserializerClass")
+      val maxPartitionFetchBytes: String = streamConsumerConf.getString("maxPartitionFetchBytes")
     }
   }
 }

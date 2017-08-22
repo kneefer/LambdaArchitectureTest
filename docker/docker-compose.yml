@@ -24,21 +24,21 @@ services:
       KAFKA_CREATE_TOPICS: "lambda:1:1"
       
   cassandra:
-    image: cassandra
+    image: cassandra:3.10
     hostname: cassandra
     container_name: development_cassandra
     ports:
       - "9042:9042"
 
-  postgres:
-    image: postgres
-    hostname: postgres
-    container_name: development_postgres
-    environment:
-      POSTGRES_PASSWORD: mysecretpassword 
-      POSTGRES_DB: lambda
-    ports:
-      - "5432:5432"
+  # postgres:
+    # image: postgres
+    # hostname: postgres
+    # container_name: development_postgres
+    # environment:
+      # POSTGRES_PASSWORD: mysecretpassword 
+      # POSTGRES_DB: lambda
+    # ports:
+      # - "5432:5432"
       
   zeppelin:
     image: apache/zeppelin:0.7.2

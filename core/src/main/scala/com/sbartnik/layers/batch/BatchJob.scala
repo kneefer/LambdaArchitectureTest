@@ -1,6 +1,7 @@
 package com.sbartnik.layers.batch
 
 import com.sbartnik.config.AppConfig
+import com.sbartnik.layers.speed.SparkStreamingConsumer.conf
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.streaming.Minutes
 
@@ -10,19 +11,23 @@ class BatchJob extends App {
 
   val ss = SparkSession
     .builder()
-    .appName("Spark Batch Processing")
+    .appName("Spark Processing")
     .master(AppConfig.sparkMaster)
     .config("spark.sql.warehouse.dir", "file:///${system:user.dir}/spark-warehouse")
     .config("spark.casandra.connection.host", conf.Cassandra.host)
     .config("spark.casandra.connection.port", conf.Cassandra.port)
     .config("spark.cassandra.auth.username", conf.Cassandra.userName)
+    .config("spark.cassandra.connection.keep_alive_ms", conf.Cassandra.keepAliveMs)
+    .config("spark.eventLog.enabled", "true")
+    .config("spark.eventLog.dir", "file:///C:/Users/Szymon/Desktop/tests/sparkhistbatch")
     .getOrCreate()
 
   val sc = ss.sparkContext
   val sqlc = ss.sqlContext
 
   val dfToProcess = sqlc.read.parquet(conf.hdfsDataPath)
-    .where(s"unix_timestamp() - timestampBucket / 1000 <= ${conf.batchBucketMinutes * 60}")
+    .where(s"unix_timestamp() - timestampBucket / 1000 < ${conf.batchBucketMinutes * 60 * 2}")
+    .where(s"unix_timestamp() - timestampBucket / 1000 >= ${conf.batchBucketMinutes * 60}")
 
   dfToProcess.createOrReplaceTempView("records")
 
@@ -30,21 +35,21 @@ class BatchJob extends App {
   // Compute unique visitors
   //////////////////////////
 
-  val uniqueVisitorsBySite = sqlc.sql("""
-      |SELECT site, timestampBucket AS timestamp_bucket,
-      |  COUNT(DISTINCT visitor) AS unique_visitors
-      |FROM records
-      |GROUP BY site, timestampBucket
-    """.stripMargin)
-
-  //uniqueVisitorsBySite.show(500)
-
-  uniqueVisitorsBySite
-    .write
-    .mode(SaveMode.Append)
-    .format("org.apache.spark.sql.cassandra")
-    .options(Map("keyspace" -> conf.Cassandra.keyspaceName, "table" -> conf.Cassandra.batchUniqueVisitorsBySiteTable))
-    .save()
+//  val uniqueVisitorsBySite = sqlc.sql("""
+//      |SELECT site, timestampBucket AS timestamp_bucket,
+//      |  COUNT(DISTINCT visitor) AS unique_visitors
+//      |FROM records
+//      |GROUP BY site, timestampBucket
+//    """.stripMargin)
+//
+//  //uniqueVisitorsBySite.show(500)
+//
+//  uniqueVisitorsBySite
+//    .write
+//    .mode(SaveMode.Append)
+//    .format("org.apache.spark.sql.cassandra")
+//    .options(Map("keyspace" -> conf.Cassandra.keyspaceName, "table" -> conf.Cassandra.batchUniqueVisitorsBySiteTable))
+//    .save()
 
   //////////////////////////
   // Compute action by site
@@ -58,7 +63,7 @@ class BatchJob extends App {
       |FROM records
       |GROUP BY site, timestampBucket
     """.stripMargin
-  ).cache()
+  )
 
   //actionsBySite.show(500)
 

@@ -14,6 +14,7 @@ object ConfigurationProvider {
     props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaStreamConsumerConf.autoOffsetReset)
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, kafkaStreamConsumerConf.keyDeserializerClass)
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, kafkaStreamConsumerConf.valueDeserializerClass)
+    props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, kafkaStreamConsumerConf.maxPartitionFetchBytes)
     props
   }
 }

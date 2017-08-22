@@ -30,7 +30,7 @@ object RestServer extends App with HttpUtil with Helpers {
   }
 
   private val routes = get {
-    pathPrefix(Segment) { api =>
+    pathPrefix(Segment) { api => withoutRequestTimeout {
       // siteName - if passed, result will contain site actions only of provided site
       //          - if not passed, result will consist of actions of all sites
       // bucketsNumber - if passed, result will include aggregated actions for period of time equals N*bucketsNumber
@@ -49,7 +49,7 @@ object RestServer extends App with HttpUtil with Helpers {
           execute(api, _.getUniqueVisitors(siteName, bucketIndex))
         }
       }
-    }
+    } }
   }
 
   val binding = Http().bindAndHandle(routes, "localhost", 9999)
